@@ -3,9 +3,9 @@
 ## Overview
 
 FAISSWRAPPER is a Python package that provides a simplified interface for using FAISS, a library for efficient similarity search and clustering of dense vectors.
+For details, see [src/faiss_wrapper/README.md](src/faiss_wrapper/README.md).
 
-NOTE: 
-GPU debugging is not yet supported.
+**NOTE:** GPU debugging is not yet supported.
 
 ## Installation
 
