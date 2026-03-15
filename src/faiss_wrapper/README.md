@@ -33,7 +33,7 @@ See [float/README.md](float/README.md) and [binary/README.md](binary/README.md) 
 | **L2**             | Squared L2 (Euclidean) distance (FAISS convention).    |
 | **INNER_PRODUCT**  | Negative inner product (maximum inner product search). |
 | **L1**             | L1 (Manhattan) distance.                               |
-| **Linf**           | L-infinity (max) distance.                             |
+| **LINF**           | L-infinity (max) distance.                             |
 | **Lp**             | Lp distance (configurable **p**).                      |
 | **CANBERRA**       | Canberra distance.                                     |
 | **BRAY_CURTIS**    | Bray–Curtis distance.                                  |

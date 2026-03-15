@@ -10,7 +10,7 @@ class FaissMetric(Enum):
     L2: L2 distance.
     INNER_PRODUCT: Inner product distance.
     L1: L1 distance.
-    Linf: Linf distance.
+    LINF: Linf distance.
     Lp: Lp distance.
     CANBERRA: Canberra distance.
     BRAY_CURTIS: Bray-Curtis distance.
@@ -20,7 +20,7 @@ class FaissMetric(Enum):
     L1 = "l1"
     L2 = "l2"
     INNER_PRODUCT = "inner_product"
-    Linf = "linf"
+    LINF = "linf"
     Lp = "lp"
     CANBERRA = "canberra"
     BRAY_CURTIS = "bray_curtis"
@@ -43,7 +43,7 @@ class FaissMetric(Enum):
                 return faiss.METRIC_L2
             case FaissMetric.INNER_PRODUCT:
                 return faiss.METRIC_INNER_PRODUCT
-            case FaissMetric.Linf:
+            case FaissMetric.LINF:
                 return faiss.METRIC_Linf
             case FaissMetric.Lp:
                 return faiss.METRIC_Lp
