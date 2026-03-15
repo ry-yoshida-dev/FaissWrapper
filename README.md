@@ -2,7 +2,8 @@
 
 ## Overview
 
-FaissWrapper is a Python package that provides a simplified interface for FAISS, a library for efficient similarity search and clustering of dense vectors. For more details, see [src/faiss_wrapper/README.md](src/faiss_wrapper/README.md).
+FaissWrapper is a Python package that provides a simplified interface for FAISS, a library for efficient similarity search and clustering of dense vectors.  
+For more details, see [src/faiss_wrapper/README.md](src/faiss_wrapper/README.md).
 
 **Note:** GPU debugging is not yet supported.
 
@@ -20,7 +21,8 @@ For development, install in editable mode so changes to the source take effect i
 pip install -e .
 ```
 
-Dependencies (numpy, faiss-cpu) are installed automatically. To install only the dependencies without the package, use:
+Dependencies (numpy, faiss-cpu) are installed automatically.  
+To install only the dependencies without the package, use:
 
 ```bash
 pip install -r requirements.txt
