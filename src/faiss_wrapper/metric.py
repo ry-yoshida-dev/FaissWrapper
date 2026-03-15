@@ -35,6 +35,10 @@ class FaissMetric(Enum):
         Returns:
         ----------
         faiss.Index: The corresponding Faiss object for the metric.
+
+        NOTE
+        - HAMMING is not used for Index.
+        - METRIC_L2 is temporary output.
         """
         match self:
             case FaissMetric.L1:
@@ -54,7 +58,7 @@ class FaissMetric(Enum):
             case FaissMetric.JENSEN_SHANNON:
                 return faiss.METRIC_JensenShannon
             case FaissMetric.HAMMING:
-                return faiss.METRIC_L2  # Binary index uses Hamming; not used for Index
+                return faiss.METRIC_L2  
 
 
 

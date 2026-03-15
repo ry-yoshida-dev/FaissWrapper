@@ -6,7 +6,7 @@ This subtree wraps FAISS **binary** indices (`uint8` packed bit vectors; Hamming
 
 ## Method–metric compatibility
 
-Aligned with **`FaissSearchMethod.supported_metrics`** in [`method.py`](../method.py). Hamming only (float metrics N/A).
+Aligned with **`FaissSearchMethod.binary_supported_metrics`** in [`method.py`](../method.py). Hamming only (float metrics N/A).
 
 | Method     | L1  | L2  | INNER_PRODUCT | Linf | Lp  | CANBERRA | BRAY_CURTIS | JENSEN_SHANNON | HAMMING |
 | ---------- | --- | --- | ------------- | ---- | --- | -------- | ----------- | -------------- | ------- |

@@ -58,12 +58,7 @@ class FaissManager(ABC):
         """
         if self.dimension <= 0:
             raise ValueError("Dimension must be greater than 0.")
-        method = self.search_method
-        if self.metric not in method.supported_metrics:
-            raise ValueError(
-                f"Metric {self.metric.value} is not supported for {method.name}. "
-                f"Supported: {[m.value for m in method.supported_metrics]}."
-            )
+        self.dtype.validate_metric(self.search_method, self.metric)
 
     @abstractmethod
     def _build_index(self) -> faiss.Index:

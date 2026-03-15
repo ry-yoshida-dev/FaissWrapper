@@ -6,7 +6,7 @@ This subtree wraps FAISS **dense float** indices (`float32` vectors).
 
 ## Method–metric compatibility
 
-Aligned with `**FaissSearchMethod.supported_metrics`** in `method.py`.
+Aligned with **`FaissSearchMethod.float_supported_metrics`** in `method.py`.
 
 | Method | L1  | L2  | INNER_PRODUCT | Linf | Lp  | CANBERRA | BRAY_CURTIS | JENSEN_SHANNON | HAMMING |
 | ------ | --- | --- | ------------- | ---- | --- | -------- | ----------- | -------------- | ------- |

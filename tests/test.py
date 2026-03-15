@@ -81,7 +81,12 @@ if __name__ == "__main__":
 
     for dtype in FaissDType:
         for method in dtype.supported_methods:
-            for metric in method.supported_metrics:
+            supported_metrics = (
+                method.float_supported_metrics
+                if dtype is FaissDType.FLOAT
+                else method.binary_supported_metrics
+            )
+            for metric in supported_metrics:
                 parameter = FaissParameter(
                     dtype=dtype,
                     method=method,

@@ -53,7 +53,7 @@ class FaissSearchMethod(Enum):
                 raise NotImplementedError(f"Search method {self.value} is not implemented.")
 
     @property
-    def supported_metrics(self) -> list[FaissMetric]:
+    def float_supported_metrics(self) -> list[FaissMetric]:
         """
         Returns the supported metrics for the search method.
         
@@ -68,4 +68,15 @@ class FaissSearchMethod(Enum):
                 return [FaissMetric.HAMMING]
             case FaissSearchMethod.IVFPQ:
                 return [FaissMetric.L2, FaissMetric.INNER_PRODUCT]
+
+    @property
+    def binary_supported_metrics(self) -> list[FaissMetric]:
+        """
+        Returns the supported metrics for the search method.
+        
+        Returns:
+        ----------
+        list[FaissMetric]: The supported metrics for the search method.
+        """
+        return [FaissMetric.HAMMING]
 

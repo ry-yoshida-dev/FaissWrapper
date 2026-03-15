@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .dtype import FaissDType
-from .metric import FaissMetric
 from .method import FaissSearchMethod
+from .metric import FaissMetric
 if TYPE_CHECKING:
     from .manager import FaissManager
     from .float import FaissFloatManager
@@ -29,14 +29,9 @@ class FaissParameter:
     metric: FaissMetric
 
     def __post_init__(self) -> None:
-        """
-        Validate the parameters.
-        """
-        # 
-        if self.method not in self.dtype.supported_methods:
-            raise ValueError(f"Method {self.method.value} is not supported for {self.dtype.value}.")
-        if self.metric not in self.method.supported_metrics:
-            raise ValueError(f"Metric {self.metric.value} is not supported for {self.method.value}.")
+        """Validate the parameters."""
+        self.dtype.validate_method(self.method)
+        self.dtype.validate_metric(self.method, self.metric)
 
     @property
     def manager_class(self) -> type["FaissManager"]:
