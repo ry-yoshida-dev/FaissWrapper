@@ -2,14 +2,25 @@
 
 ## Overview
 
-FAISSWRAPPER is a Python package that provides a simplified interface for using FAISS, a library for efficient similarity search and clustering of dense vectors.
-For details, see [src/faiss_wrapper/README.md](src/faiss_wrapper/README.md).
+FaissWrapper is a Python package that provides a simplified interface for FAISS, a library for efficient similarity search and clustering of dense vectors. For more details, see [src/faiss_wrapper/README.md](src/faiss_wrapper/README.md).
 
-**NOTE:** GPU debugging is not yet supported.
+**Note:** GPU debugging is not yet supported.
 
 ## Installation
 
-To install the required dependencies, use pip with the `requirements.txt` file:
+From the package root (the directory containing `pyproject.toml`):
+
+```bash
+pip install .
+```
+
+For development, install in editable mode so changes to the source take effect immediately:
+
+```bash
+pip install -e .
+```
+
+Dependencies (numpy, faiss-cpu) are installed automatically. To install only the dependencies without the package, use:
 
 ```bash
 pip install -r requirements.txt
@@ -19,17 +30,19 @@ pip install -r requirements.txt
 
 ### Float + Flat via `FaissParameter`
 
-Run from the package root (the directory that contains `src/`), with that directory on `PYTHONPATH` (e.g. `export PYTHONPATH=.`) or install the package in editable mode.
+After installing the package, import it from any directory:
 
 ```python
 import numpy as np
 
-from src.dtype import FaissDType
-from src.float.manager import FaissFloatManager
-from src.method import FaissSearchMethod
-from src.metric import FaissMetric
-from src.parameter import FaissParameter
-from src.result import FaissResult
+from faiss_wrapper import (
+    FaissDType,
+    FaissFloatManager,
+    FaissSearchMethod,
+    FaissMetric,
+    FaissParameter,
+    FaissResult,
+)
 
 dim: int = 64
 rng = np.random.default_rng(42)
@@ -52,7 +65,7 @@ result: FaissResult = manager.search(query_vectors, k=10)  # k: int
 
 ## Test
 
-To run the example, execute the following command:
+From the package root, run:
 
 ```bash
 python -m tests.test
