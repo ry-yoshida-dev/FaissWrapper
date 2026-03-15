@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faiss_wrapper"
+version = "0.0.1"
+authors = [
+  { name="Ryuto Yoshida" },
+]
+description = "Simplified Python interface for FAISS (similarity search and clustering of dense vectors)."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "faiss-cpu",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ry-yoshida/ImageHashSearch"
+"Bug Tracker" = "https://github.com/ry-yoshida/ImageHashSearch/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
