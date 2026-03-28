@@ -1,4 +1,4 @@
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 from typing import Callable
 
@@ -43,7 +43,7 @@ class FaissBinaryManager(FaissManager):
         ----------
         Callable[[faiss.Index, str], None]: The save function for the binary index.
         """
-        return faiss.write_index_binary
+        return faiss.write_index_binary # type: ignore
 
     @property
     def load_function(self) -> Callable[[str], faiss.Index]:
@@ -54,4 +54,4 @@ class FaissBinaryManager(FaissManager):
         ----------
         Callable[[str], faiss.Index]: The load function for the binary index.
         """
-        return faiss.read_index_binary
+        return faiss.read_index_binary # type: ignore

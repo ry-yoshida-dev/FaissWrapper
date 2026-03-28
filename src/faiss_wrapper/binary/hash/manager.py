@@ -1,31 +1,30 @@
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissBinaryManager
-from ...metric import FaissMetric
 from ...method import FaissSearchMethod
 
 
 @dataclass
 class FaissBinaryHashManager(FaissBinaryManager):
     """
-    Faiss manager for ``IndexBinaryHash`` (LSH-style single hash table), Hamming distance.
+    Faiss manager for IndexBinaryHash (LSH-style single hash table), Hamming distance.
 
-    Corresponds to ``faiss.IndexBinaryHash(d, b)`` in faiss.ipynb:
-    - ``d``: bit length of each vector (must be multiple of 8).
-    - ``b``: number of leading bits used as bucket key; larger ``b`` narrows
+    Corresponds to faiss.IndexBinaryHash(d, b) in faiss.ipynb:
+    - d: bit length of each vector (must be multiple of 8).
+    - b: number of leading bits used as bucket key; larger b narrows
       candidates but vectors differing in those bits may not co-bucket.
 
-    Vectors are uint8 arrays of shape ``(n, d // 8)``.
+    Vectors are uint8 arrays of shape (n, d // 8).
 
     Parameters
     ----------
     dimension : int
-        Number of bits per vector (``d_bits``).
+        Number of bits per vector (d_bits).
     metric : FaissMetric
         Must be HAMMING.
     hash_bits : int
-        ``b`` — bits used for hashing (bucket id).
+        b — bits used for hashing (bucket id).
     """
 
     hash_bits: int = 12
@@ -37,8 +36,15 @@ class FaissBinaryHashManager(FaissBinaryManager):
         if self.hash_bits > self.dimension:
             raise ValueError("hash_bits cannot exceed dimension (bit length).")
 
-    def _build_index(self):
-        return faiss.IndexBinaryHash(self.dimension, self.hash_bits)
+    def _build_index(self) -> faiss.Index:
+        """
+        Build the index.
+        
+        Returns:
+        ----------
+        faiss.Index: The built index.
+        """
+        return faiss.IndexBinaryHash(self.dimension, self.hash_bits) # type: ignore
 
     @property
     def search_method(self) -> FaissSearchMethod:

@@ -1,4 +1,4 @@
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager

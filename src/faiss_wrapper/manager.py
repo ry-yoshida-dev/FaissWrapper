@@ -1,8 +1,8 @@
-import faiss
+import faiss # type: ignore
 import numpy as np
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Callable, cast
 
 from .metric import FaissMetric
 from .result import FaissResult
@@ -42,7 +42,7 @@ class FaissManager(ABC):
         ----------
         ValueError: If the GPU is not available.
         """
-        num_gpus = faiss.get_num_gpus()
+        num_gpus = faiss.get_num_gpus() # type: ignore
         if self.is_gpu_enabled and num_gpus == 0:
             raise ValueError("GPU is not available. Please set is_gpu_enabled to False or None.")
         if self.is_gpu_enabled is None:
@@ -50,7 +50,7 @@ class FaissManager(ABC):
 
     def _validate_parameters(self) -> None:
         """
-        Validate the parameters of the manager (dimension, metric vs ``search_method``).
+        Validate the parameters of the manager (dimension, metric vs search_method).
         
         Raises:
         ----------
@@ -83,7 +83,7 @@ class FaissManager(ABC):
         vectors: np.ndarray
             The vectors to add to the index.
         """
-        self.index.add(vectors)
+        self.index.add(vectors) # type: ignore
 
     def search(
         self, 
@@ -104,7 +104,7 @@ class FaissManager(ABC):
         ----------
         FaissResult: The result of the search.
         """
-        distances, indices = self.index.search(vectors, k)
+        distances, indices = cast(tuple[np.ndarray, np.ndarray], self.index.search(vectors, k)) # type: ignore
         return FaissResult(
             distances=distances, 
             indices=indices

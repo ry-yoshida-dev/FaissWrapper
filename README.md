@@ -39,7 +39,7 @@ import numpy as np
 
 from faiss_wrapper import (
     FaissDType,
-    FaissFloatManager,
+    FaissManager,
     FaissSearchMethod,
     FaissMetric,
     FaissParameter,
@@ -56,7 +56,7 @@ param = FaissParameter(
     method=FaissSearchMethod.FLAT,
     metric=FaissMetric.L2,
 )
-manager: FaissFloatManager = param.manager_class(dimension=dim, metric=FaissMetric.L2)
+manager: FaissManager = param.manager_class(dimension=dim, metric=FaissMetric.L2)
 manager.add(db_vectors)  # np.ndarray, shape (n, dim), float32
 
 result: FaissResult = manager.search(query_vectors, k=10)  # k: int

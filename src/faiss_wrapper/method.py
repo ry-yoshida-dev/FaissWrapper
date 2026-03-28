@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import faiss
+import faiss # type: ignore
 from enum import Enum
 from .metric import FaissMetric
 
@@ -36,21 +36,19 @@ class FaissSearchMethod(Enum):
         """
         match self:
             case FaissSearchMethod.FLAT:
-                return faiss.IndexFlat
+                return faiss.IndexFlat # type: ignore
             case FaissSearchMethod.IVF:
-                return faiss.IndexIVFFlat
+                return faiss.IndexIVFFlat # type: ignore
             case FaissSearchMethod.IVFPQ:
-                return faiss.IndexIVFPQ
+                return faiss.IndexIVFPQ # type: ignore
             case FaissSearchMethod.HNSW:
-                return faiss.IndexHNSWFlat
+                return faiss.IndexHNSWFlat # type: ignore
             case FaissSearchMethod.LSH:
-                return faiss.IndexLSH
+                return faiss.IndexLSH # type: ignore
             case FaissSearchMethod.HASH:
-                return faiss.IndexBinaryHash
+                return faiss.IndexBinaryHash # type: ignore
             case FaissSearchMethod.MULTI_HASH:
-                return faiss.IndexBinaryMultiHash
-            case _:
-                raise NotImplementedError(f"Search method {self.value} is not implemented.")
+                return faiss.IndexBinaryMultiHash # type: ignore
 
     @property
     def float_supported_metrics(self) -> list[FaissMetric]:

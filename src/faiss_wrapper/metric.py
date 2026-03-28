@@ -1,4 +1,4 @@
-import faiss
+import faiss # type: ignore
 from enum import Enum
 
 class FaissMetric(Enum):
@@ -42,23 +42,23 @@ class FaissMetric(Enum):
         """
         match self:
             case FaissMetric.L1:
-                return faiss.METRIC_L1
+                return faiss.METRIC_L1 # type: ignore
             case FaissMetric.L2:
-                return faiss.METRIC_L2
+                return faiss.METRIC_L2 # type: ignore
             case FaissMetric.INNER_PRODUCT:
-                return faiss.METRIC_INNER_PRODUCT
+                return faiss.METRIC_INNER_PRODUCT # type: ignore
             case FaissMetric.LINF:
-                return faiss.METRIC_Linf
+                return faiss.METRIC_Linf # type: ignore
             case FaissMetric.Lp:
-                return faiss.METRIC_Lp
+                return faiss.METRIC_Lp # type: ignore
             case FaissMetric.CANBERRA:
-                return faiss.METRIC_Canberra
+                return faiss.METRIC_Canberra # type: ignore
             case FaissMetric.BRAY_CURTIS:
-                return faiss.METRIC_BrayCurtis
+                return faiss.METRIC_BrayCurtis # type: ignore
             case FaissMetric.JENSEN_SHANNON:
-                return faiss.METRIC_JensenShannon
+                return faiss.METRIC_JensenShannon # type: ignore
             case FaissMetric.HAMMING:
-                return faiss.METRIC_L2  
+                return faiss.METRIC_L2 # type: ignore
 
 
 

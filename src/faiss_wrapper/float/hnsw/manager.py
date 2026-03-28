@@ -1,5 +1,5 @@
 import numpy as np
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
@@ -33,7 +33,7 @@ class FaissFloatHNSWManager(FaissFloatManager):
     def add(self, vectors: np.ndarray) -> None:
         """Add vectors to the index."""
         super().add(vectors)
-        self.index.hnsw.efSearch = self.efSearch
+        self.index.hnsw.efSearch = self.efSearch # type: ignore
 
     @property
     def search_method(self) -> FaissSearchMethod:

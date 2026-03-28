@@ -1,4 +1,4 @@
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
@@ -28,8 +28,22 @@ class FaissFloatLSHManager(FaissFloatManager):
             raise ValueError("nbits must be greater than 0.")
 
     def _build_index(self) -> faiss.Index:
+        """
+        Build the index.
+        
+        Returns:
+        ----------
+        faiss.Index: The built index.
+        """
         return faiss.IndexLSH(self.dimension, self.nbits)
 
     @property
     def search_method(self) -> FaissSearchMethod:
+        """
+        Returns the search method.
+        
+        Returns:
+        ----------
+        FaissSearchMethod: The search method.
+        """
         return FaissSearchMethod.LSH

@@ -1,5 +1,5 @@
 import numpy as np
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
@@ -46,11 +46,25 @@ class FaissFloatIVFPQManager(FaissFloatManager):
         )
 
     def add(self, vectors: np.ndarray) -> None:
-        """Train the index, add vectors, and set nprobe (IVFPQ requires training)."""
-        self.index.train(vectors)
+        """
+        Train the index, add vectors, and set nprobe (IVFPQ requires training).
+        
+        Parameters:
+        ----------
+        vectors: np.ndarray
+            The vectors to train the index on.
+        """
+        self.index.train(vectors) # type: ignore
         super().add(vectors)
-        self.index.nprobe = self.nprobe
+        self.index.nprobe = self.nprobe # type: ignore
 
     @property
     def search_method(self) -> FaissSearchMethod:
+        """
+        Returns the search method.
+        
+        Returns:
+        ----------
+        FaissSearchMethod: The search method.
+        """
         return FaissSearchMethod.IVFPQ

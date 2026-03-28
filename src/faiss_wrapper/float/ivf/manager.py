@@ -1,5 +1,5 @@
 import numpy as np
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
@@ -34,10 +34,24 @@ class FaissFloatIVFManager(FaissFloatManager):
         return faiss.IndexIVFFlat(quantizer, self.dimension, self.nlist, metric_obj)
 
     def add(self, vectors: np.ndarray) -> None:
-        """Train the index then add vectors (IVF requires training)."""
-        self.index.train(vectors)
+        """
+        Train the index then add vectors (IVF requires training).
+        
+        Parameters:
+        ----------
+        vectors: np.ndarray
+            The vectors to train the index on.
+        """
+        self.index.train(vectors) # type: ignore
         super().add(vectors)
 
     @property
     def search_method(self) -> FaissSearchMethod:
+        """
+        Returns the search method.
+        
+        Returns:
+        ----------
+        FaissSearchMethod: The search method.
+        """
         return FaissSearchMethod.IVF

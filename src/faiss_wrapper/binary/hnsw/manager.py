@@ -1,9 +1,8 @@
 import numpy as np
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissBinaryManager
-from ...metric import FaissMetric
 from ...method import FaissSearchMethod
 
 
@@ -34,8 +33,15 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
         if self.efSearch <= 0:
             raise ValueError("efSearch must be greater than 0.")
 
-    def _build_index(self):
-        return faiss.IndexBinaryHNSW(self.dimension, self.M)
+    def _build_index(self) -> faiss.Index:
+        """
+        Build the index.
+        
+        Returns:
+        ----------
+        faiss.Index: The built index.
+        """
+        return faiss.IndexBinaryHNSW(self.dimension, self.M) # type: ignore
 
     def add(
         self, 
@@ -50,8 +56,15 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
             The vectors to add to the index.
         """
         super().add(vectors)
-        self.index.hnsw.efSearch = self.efSearch
+        self.index.hnsw.efSearch = self.efSearch # type: ignore
 
     @property
     def search_method(self) -> FaissSearchMethod:
+        """
+        Returns the search method.
+        
+        Returns:
+        ----------
+        FaissSearchMethod: The search method.
+        """
         return FaissSearchMethod.HNSW

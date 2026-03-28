@@ -1,8 +1,7 @@
-import faiss
+import faiss # type: ignore
 from dataclasses import dataclass
 
 from ..manager import FaissBinaryManager
-from ...metric import FaissMetric
 from ...method import FaissSearchMethod
 
 
@@ -20,8 +19,15 @@ class FaissBinaryFlatManager(FaissBinaryManager):
         Must be FaissMetric.HAMMING (Hamming distance is always used).
     """
 
-    def _build_index(self):  # faiss.IndexBinaryFlat, not faiss.Index
-        return faiss.IndexBinaryFlat(self.dimension)
+    def _build_index(self) -> faiss.Index:
+        """
+        Build the index.
+        
+        Returns:
+        ----------
+        faiss.Index: The built index.
+        """
+        return faiss.IndexBinaryFlat(self.dimension) # type: ignore
 
     @property
     def search_method(self) -> FaissSearchMethod:
