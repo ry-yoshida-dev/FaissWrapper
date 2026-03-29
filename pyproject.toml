@@ -27,3 +27,6 @@ Homepage = "https://github.com/ry-yoshida-private/FaissWrapper"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+faiss_wrapper = ["py.typed"]
