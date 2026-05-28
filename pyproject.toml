@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ry-yoshida-private/FaissWrapper"
-"Bug Tracker" = "https://github.com/ry-yoshida-private/FaissWrapper/issues"
+Homepage = "https://github.com/ry-yoshida-dev/FaissWrapper"
+"Bug Tracker" = "https://github.com/ry-yoshida-dev/FaissWrapper/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
