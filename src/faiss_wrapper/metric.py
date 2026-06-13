@@ -1,4 +1,4 @@
-import faiss # type: ignore
+import faiss
 from enum import Enum
 
 class FaissMetric(Enum):
@@ -28,13 +28,14 @@ class FaissMetric(Enum):
     HAMMING = "hamming"
 
     @property
-    def object(self) -> faiss.Index:
+    def object(self) -> faiss.MetricType:
         """
-        Returns the corresponding Faiss object for the metric.
-        
-        Returns:
-        ----------
-        faiss.Index: The corresponding Faiss object for the metric.
+        Returns the corresponding Faiss metric constant.
+
+        Returns
+        -------
+        faiss.MetricType
+            Faiss metric identifier (e.g. ``METRIC_L2``).
 
         NOTE
         - HAMMING is not used for Index.
@@ -42,23 +43,23 @@ class FaissMetric(Enum):
         """
         match self:
             case FaissMetric.L1:
-                return faiss.METRIC_L1 # type: ignore
+                return faiss.METRIC_L1
             case FaissMetric.L2:
-                return faiss.METRIC_L2 # type: ignore
+                return faiss.METRIC_L2
             case FaissMetric.INNER_PRODUCT:
-                return faiss.METRIC_INNER_PRODUCT # type: ignore
+                return faiss.METRIC_INNER_PRODUCT
             case FaissMetric.LINF:
-                return faiss.METRIC_Linf # type: ignore
+                return faiss.METRIC_Linf
             case FaissMetric.Lp:
-                return faiss.METRIC_Lp # type: ignore
+                return faiss.METRIC_Lp
             case FaissMetric.CANBERRA:
-                return faiss.METRIC_Canberra # type: ignore
+                return faiss.METRIC_Canberra
             case FaissMetric.BRAY_CURTIS:
-                return faiss.METRIC_BrayCurtis # type: ignore
+                return faiss.METRIC_BrayCurtis
             case FaissMetric.JENSEN_SHANNON:
-                return faiss.METRIC_JensenShannon # type: ignore
+                return faiss.METRIC_JensenShannon
             case FaissMetric.HAMMING:
-                return faiss.METRIC_L2 # type: ignore
+                return faiss.METRIC_L2
 
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import faiss # type: ignore
+import faiss
 from enum import Enum
 from .metric import FaissMetric
 
@@ -26,29 +26,30 @@ class FaissSearchMethod(Enum):
     MULTI_HASH = "multi_hash"
 
     @property
-    def object(self) -> faiss.Index:
+    def object(self) -> type[faiss.Index] | type[faiss.IndexBinary]:
         """
-        Returns the corresponding Faiss object for the search method.
-        
-        Returns:
-        ----------
-        faiss.Index: The corresponding Faiss object for the search method.
+        Returns the corresponding Faiss index class for the search method.
+
+        Returns
+        -------
+        type[faiss.Index] | type[faiss.IndexBinary]
+            Faiss index class (not an instance) for the search method.
         """
         match self:
             case FaissSearchMethod.FLAT:
-                return faiss.IndexFlat # type: ignore
+                return faiss.IndexFlat
             case FaissSearchMethod.IVF:
-                return faiss.IndexIVFFlat # type: ignore
+                return faiss.IndexIVFFlat
             case FaissSearchMethod.IVFPQ:
-                return faiss.IndexIVFPQ # type: ignore
+                return faiss.IndexIVFPQ
             case FaissSearchMethod.HNSW:
-                return faiss.IndexHNSWFlat # type: ignore
+                return faiss.IndexHNSWFlat
             case FaissSearchMethod.LSH:
-                return faiss.IndexLSH # type: ignore
+                return faiss.IndexLSH
             case FaissSearchMethod.HASH:
-                return faiss.IndexBinaryHash # type: ignore
+                return faiss.IndexBinaryHash
             case FaissSearchMethod.MULTI_HASH:
-                return faiss.IndexBinaryMultiHash # type: ignore
+                return faiss.IndexBinaryMultiHash
 
     @property
     def float_supported_metrics(self) -> list[FaissMetric]:

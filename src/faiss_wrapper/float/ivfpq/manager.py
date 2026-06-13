@@ -1,7 +1,7 @@
-import numpy as np
 import faiss # type: ignore
 from dataclasses import dataclass
 
+from ...types import FloatVectorArray
 from ..manager import FaissFloatManager
 from ...method import FaissSearchMethod
 
@@ -45,13 +45,13 @@ class FaissFloatIVFPQManager(FaissFloatManager):
             quantizer, self.dimension, self.nlist, self.m, self.nbits, metric_obj
         )
 
-    def add(self, vectors: np.ndarray) -> None:
+    def add(self, vectors: FloatVectorArray) -> None:
         """
         Train the index, add vectors, and set nprobe (IVFPQ requires training).
         
         Parameters:
         ----------
-        vectors: np.ndarray
+        vectors: FloatVectorArray
             The vectors to train the index on.
         """
         self.index.train(vectors) # type: ignore

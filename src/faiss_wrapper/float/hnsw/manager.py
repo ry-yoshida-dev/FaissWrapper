@@ -1,7 +1,7 @@
-import numpy as np
 import faiss # type: ignore
 from dataclasses import dataclass
 
+from ...types import FloatVectorArray
 from ..manager import FaissFloatManager
 from ...method import FaissSearchMethod
 
@@ -30,7 +30,7 @@ class FaissFloatHNSWManager(FaissFloatManager):
         metric_obj = self.metric.object
         return faiss.IndexHNSWFlat(self.dimension, self.M, metric_obj)
 
-    def add(self, vectors: np.ndarray) -> None:
+    def add(self, vectors: FloatVectorArray) -> None:
         """Add vectors to the index."""
         super().add(vectors)
         self.index.hnsw.efSearch = self.efSearch # type: ignore

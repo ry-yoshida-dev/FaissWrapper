@@ -1,7 +1,7 @@
-import numpy as np
 import faiss # type: ignore
 from dataclasses import dataclass
 
+from ...types import BinaryVectorArray
 from ..manager import FaissBinaryManager
 from ...method import FaissSearchMethod
 
@@ -45,14 +45,14 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
 
     def add(
         self, 
-        vectors: np.ndarray
+        vectors: BinaryVectorArray
         ) -> None:
         """
         Add vectors to the index.
 
         Parameters:
         ----------
-        vectors: np.ndarray
+        vectors: BinaryVectorArray
             The vectors to add to the index.
         """
         super().add(vectors)

@@ -44,9 +44,10 @@ See [float/README.md](float/README.md) and [binary/README.md](binary/README.md) 
 
 | Component | Description |
 | --------- | ----------- |
+| [`types.py`](types.py) | NumPy array type aliases for vectors, distances, and indices. |
 | [`manager.py`](manager.py) | Common index API. Concrete indexes inherit from this. |
 | [`method.py`](method.py) | Search methods and supported metrics. |
 | [`metric.py`](metric.py) | Distance/similarity kinds. |
-| [`result.py`](result.py) | Dataclass that holds search output (distances and indices). |
+| [result/](result/README.md) | ``FaissResult`` (shape ``(k,)``) and ``FaissResults`` (shape ``(n_queries, k)``); neighbors sorted in ``__post_init__``. |
 | [float/](float/README.md) | Float index API. Concrete float indexes inherit from the common manager. |
 | [binary/](binary/README.md) | Binary index API. Concrete binary indexes inherit from the common manager. |

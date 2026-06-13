@@ -1,4 +1,4 @@
-import faiss # type: ignore
+import faiss
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
@@ -19,7 +19,8 @@ class FaissFloatFlatManager(FaissFloatManager):
     """
 
     def _build_index(self) -> faiss.Index:
-        return faiss.IndexFlat(self.dimension, self.metric.object)
+        metric_type: faiss.MetricType = self.metric.object
+        return faiss.IndexFlat(self.dimension, metric_type)
 
     @property
     def search_method(self) -> FaissSearchMethod:

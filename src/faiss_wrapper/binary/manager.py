@@ -2,8 +2,10 @@ import faiss # type: ignore
 from dataclasses import dataclass
 from typing import Callable
 
+from ..types import BinaryVectorArray
 from ..dtype import FaissDType
 from ..manager import FaissManager
+from ..result import FaissResult, FaissResults
 
 @dataclass
 class FaissBinaryManager(FaissManager):
@@ -22,6 +24,36 @@ class FaissBinaryManager(FaissManager):
         super()._validate_parameters()
         if self.dimension % 8 != 0:
             raise ValueError("dimension (d_bits) must be a multiple of 8.")
+
+    def add(self, vectors: BinaryVectorArray) -> None:
+        """
+        Add packed binary vectors to the index.
+
+        Parameters
+        ----------
+        vectors : BinaryVectorArray
+            Packed binary vectors (uint8), shape ``(n, dimension // 8)``.
+        """
+        super().add(vectors)
+
+    def search(self, vectors: BinaryVectorArray, k: int = 10) -> FaissResult | FaissResults:
+        """
+        Search the index for nearest neighbors among binary query vectors.
+
+        Parameters
+        ----------
+        vectors : BinaryVectorArray
+            Packed binary query vectors (uint8), shape
+            ``(n_query, dimension // 8)`` or ``(dimension // 8,)``.
+        k : int, optional
+            Number of nearest neighbors to return per query.
+
+        Returns
+        -------
+        FaissResult | FaissResults
+            ``FaissResult`` for a single query vector; ``FaissResults`` for a batch.
+        """
+        return super().search(vectors, k)
 
     @property
     def dtype(self) -> FaissDType:

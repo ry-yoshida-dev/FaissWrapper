@@ -5,6 +5,7 @@ dtype / method / metric combination supported by FaissParameter.
 
 import numpy as np
 
+from src.faiss_wrapper.types import BinaryVectorArray, FloatVectorArray
 from src.faiss_wrapper.manager import FaissManager
 from src.faiss_wrapper.dtype import FaissDType
 from src.faiss_wrapper.parameter import FaissParameter
@@ -15,7 +16,7 @@ def create_float_test_data(
     n_query: int = 2,
     dim: int = 32,
     seed: int = 42,
-) -> tuple[np.ndarray, np.ndarray, int]:
+) -> tuple[FloatVectorArray, FloatVectorArray, int]:
     """
     Build random float32 database and query matrices for float indices.
 
@@ -32,7 +33,7 @@ def create_float_test_data(
 
     Returns:
     ----------
-    tuple[np.ndarray, np.ndarray, int]
+    tuple[FloatVectorArray, FloatVectorArray, int]
         ``(db, queries, dim)`` where ``db`` and ``queries`` are float32,
         shapes ``(n_db, dim)`` and ``(n_query, dim)``.
     """
@@ -47,7 +48,7 @@ def create_binary_test_data(
     n_query: int = 2,
     bit_size: int = 256,
     seed: int = 42,
-) -> tuple[np.ndarray, np.ndarray, int]:
+) -> tuple[BinaryVectorArray, BinaryVectorArray, int]:
     """
     Build random packed binary rows (uint8) for binary / Hamming indices.
 
@@ -64,7 +65,7 @@ def create_binary_test_data(
 
     Returns:
     ----------
-    tuple[np.ndarray, np.ndarray, int]
+    tuple[BinaryVectorArray, BinaryVectorArray, int]
         ``(db, queries, bit_size)`` where ``db`` and ``queries`` are uint8,
         shapes ``(n_db, bit_size // 8)`` and ``(n_query, bit_size // 8)``.
         The third element is the dimension passed to the binary manager.

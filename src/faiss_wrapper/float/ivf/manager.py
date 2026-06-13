@@ -1,7 +1,7 @@
-import numpy as np
 import faiss # type: ignore
 from dataclasses import dataclass
 
+from ...types import FloatVectorArray
 from ..manager import FaissFloatManager
 from ...method import FaissSearchMethod
 
@@ -33,13 +33,13 @@ class FaissFloatIVFManager(FaissFloatManager):
         quantizer = faiss.IndexFlat(self.dimension, metric_obj)
         return faiss.IndexIVFFlat(quantizer, self.dimension, self.nlist, metric_obj)
 
-    def add(self, vectors: np.ndarray) -> None:
+    def add(self, vectors: FloatVectorArray) -> None:
         """
         Train the index then add vectors (IVF requires training).
         
         Parameters:
         ----------
-        vectors: np.ndarray
+        vectors: FloatVectorArray
             The vectors to train the index on.
         """
         self.index.train(vectors) # type: ignore

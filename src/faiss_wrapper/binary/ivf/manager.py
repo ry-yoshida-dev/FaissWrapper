@@ -1,7 +1,7 @@
-import numpy as np
 import faiss # type: ignore
 from dataclasses import dataclass
 
+from ...types import BinaryVectorArray
 from ..manager import FaissBinaryManager
 from ...method import FaissSearchMethod
 
@@ -48,13 +48,13 @@ class FaissBinaryIVFManager(FaissBinaryManager):
         super().__post_init__()
         self.index.nprobe = self.nprobe # type: ignore
 
-    def add(self, vectors: np.ndarray) -> None:
+    def add(self, vectors: BinaryVectorArray) -> None:
         """
         Train the IVF index then add vectors (required for IndexBinaryIVF).
         
         Parameters:
         ----------
-        vectors: np.ndarray
+        vectors: BinaryVectorArray
             The vectors to train the index on.
         """
         self.index.train(vectors) # type: ignore

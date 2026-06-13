@@ -44,12 +44,14 @@ from faiss_wrapper import (
     FaissMetric,
     FaissParameter,
     FaissResult,
+    FaissResults,
+    FloatVectorArray,
 )
 
 dim: int = 64
 rng = np.random.default_rng(42)
-db_vectors: np.ndarray = rng.random((1_000, dim), dtype=np.float32)
-query_vectors: np.ndarray = rng.random((5, dim), dtype=np.float32)
+db_vectors: FloatVectorArray = rng.random((1_000, dim), dtype=np.float32)
+query_vectors: FloatVectorArray = rng.random((5, dim), dtype=np.float32)
 
 param = FaissParameter(
     dtype=FaissDType.FLOAT,
@@ -57,10 +59,14 @@ param = FaissParameter(
     metric=FaissMetric.L2,
 )
 manager: FaissManager = param.manager_class(dimension=dim, metric=FaissMetric.L2)
-manager.add(db_vectors)  # np.ndarray, shape (n, dim), float32
+manager.add(db_vectors)  # FloatVectorArray, shape (n, dim), float32
 
-result: FaissResult = manager.search(query_vectors, k=10)  # k: int
-# result.distances[i, j], result.indices[i, j]
+results: FaissResults = manager.search(query_vectors, k=10)  # k: int
+# results.distances[i, j], results.indices[i, j]
+
+single_query: FloatVectorArray = query_vectors[0]
+result: FaissResult = manager.search(single_query, k=10)
+# result.distances[j], result.indices[j]
 
 # Optional: manager.save("my_index.faiss") / manager.load("my_index.faiss")
 ```
