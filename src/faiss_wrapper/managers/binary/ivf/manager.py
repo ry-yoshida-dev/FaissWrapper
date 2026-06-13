@@ -1,9 +1,9 @@
 import faiss # type: ignore
 from dataclasses import dataclass
 
-from ...types import BinaryVectorArray
+from ....types import BinaryVectorArray
 from ..manager import FaissBinaryManager
-from ...method import FaissSearchMethod
+from ....method import FaissSearchMethod
 
 
 @dataclass

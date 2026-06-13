@@ -11,21 +11,19 @@ from .method import FaissSearchMethod
 from .metric import FaissMetric
 from .result import FaissResult, FaissResults
 from .parameter import FaissParameter
-from .float import (
-    FaissFloatManager,
+from .managers import (
+    FaissBinaryFlatManager,
+    FaissBinaryHashManager,
+    FaissBinaryHNSWManager,
+    FaissBinaryIVFManager,
+    FaissBinaryManager,
+    FaissBinaryMultiHashManager,
     FaissFloatFlatManager,
+    FaissFloatHNSWManager,
     FaissFloatIVFManager,
     FaissFloatIVFPQManager,
-    FaissFloatHNSWManager,
     FaissFloatLSHManager,
-    )
-from .binary import (
-    FaissBinaryManager,
-    FaissBinaryFlatManager,
-    FaissBinaryIVFManager,
-    FaissBinaryHNSWManager,
-    FaissBinaryMultiHashManager,
-    FaissBinaryHashManager,
+    FaissFloatManager,
 )
 
 __all__ = [

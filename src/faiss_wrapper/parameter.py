@@ -7,8 +7,8 @@ from .method import FaissSearchMethod
 from .metric import FaissMetric
 if TYPE_CHECKING:
     from .manager import FaissManager
-    from .float import FaissFloatManager
-    from .binary import FaissBinaryManager
+    from .managers.float import FaissFloatManager
+    from .managers.binary import FaissBinaryManager
 
 @dataclass
 class FaissParameter:
@@ -60,19 +60,19 @@ class FaissParameter:
         """
         match self.method:
             case FaissSearchMethod.FLAT:
-                from .float.flat import FaissFloatFlatManager
+                from .managers.float.flat import FaissFloatFlatManager
                 return FaissFloatFlatManager
             case FaissSearchMethod.IVF:
-                from .float.ivf import FaissFloatIVFManager
+                from .managers.float.ivf import FaissFloatIVFManager
                 return FaissFloatIVFManager
             case FaissSearchMethod.IVFPQ:
-                from .float.ivfpq import FaissFloatIVFPQManager
+                from .managers.float.ivfpq import FaissFloatIVFPQManager
                 return FaissFloatIVFPQManager
             case FaissSearchMethod.HNSW:
-                from .float.hnsw import FaissFloatHNSWManager
+                from .managers.float.hnsw import FaissFloatHNSWManager
                 return FaissFloatHNSWManager
             case FaissSearchMethod.LSH:
-                from .float.lsh import FaissFloatLSHManager
+                from .managers.float.lsh import FaissFloatLSHManager
                 return FaissFloatLSHManager
             case _:
                 raise ValueError(f"Search method {self.method.value} is not supported for float data type.")
@@ -88,19 +88,19 @@ class FaissParameter:
         """
         match self.method:
             case FaissSearchMethod.FLAT:
-                from .binary.flat import FaissBinaryFlatManager
+                from .managers.binary.flat import FaissBinaryFlatManager
                 return FaissBinaryFlatManager
             case FaissSearchMethod.IVF:
-                from .binary.ivf import FaissBinaryIVFManager
+                from .managers.binary.ivf import FaissBinaryIVFManager
                 return FaissBinaryIVFManager
             case FaissSearchMethod.HNSW:
-                from .binary.hnsw import FaissBinaryHNSWManager
+                from .managers.binary.hnsw import FaissBinaryHNSWManager
                 return FaissBinaryHNSWManager
             case FaissSearchMethod.HASH:
-                from .binary.hash import FaissBinaryHashManager
+                from .managers.binary.hash import FaissBinaryHashManager
                 return FaissBinaryHashManager
             case FaissSearchMethod.MULTI_HASH:
-                from .binary.multi_hash import FaissBinaryMultiHashManager
+                from .managers.binary.multi_hash import FaissBinaryMultiHashManager
                 return FaissBinaryMultiHashManager
             case _:
                 raise ValueError(f"Search method {self.method.value} is not supported for binary data type.")

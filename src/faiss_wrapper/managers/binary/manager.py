@@ -2,10 +2,10 @@ import faiss # type: ignore
 from dataclasses import dataclass
 from typing import Callable
 
-from ..types import BinaryVectorArray
-from ..dtype import FaissDType
-from ..manager import FaissManager
-from ..result import FaissResult, FaissResults
+from ...types import BinaryVectorArray
+from ...dtype import FaissDType
+from ...manager import FaissManager
+from ...result import FaissResult, FaissResults
 
 @dataclass
 class FaissBinaryManager(FaissManager):

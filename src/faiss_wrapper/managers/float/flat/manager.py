@@ -2,7 +2,7 @@ import faiss
 from dataclasses import dataclass
 
 from ..manager import FaissFloatManager
-from ...method import FaissSearchMethod
+from ....method import FaissSearchMethod
 
 
 @dataclass

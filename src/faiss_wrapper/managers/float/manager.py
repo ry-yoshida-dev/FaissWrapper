@@ -4,11 +4,11 @@ import faiss
 from dataclasses import dataclass
 from typing import Callable
 
-from ..types import FloatVectorArray
-from ..dtype import FaissDType
-from ..manager import FaissManager
-from ..method import FaissSearchMethod
-from ..result import FaissResult, FaissResults
+from ...types import FloatVectorArray
+from ...dtype import FaissDType
+from ...manager import FaissManager
+from ...method import FaissSearchMethod
+from ...result import FaissResult, FaissResults
 
 @dataclass
 class FaissFloatManager(FaissManager):
