@@ -106,7 +106,9 @@ if __name__ == "__main__":
                     dimension=dimension,
                 )
                 manager.add(db)
-                result = manager.search(queries, k=2)
-                assert result.distances.shape[0] == queries.shape[0]
+                result = manager.search_batch(queries, k=2)
+                assert result.values.shape[0] == queries.shape[0]
+                single_result = manager.search_single(queries[0], k=2)
+                assert single_result.values.shape[0] == 2
                 manager.save(path=save_path)
                 manager.load(path=save_path)

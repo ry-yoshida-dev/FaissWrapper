@@ -1,9 +1,9 @@
 from .manager import FaissManager
 from .types import (
     BinaryVectorArray,
-    DistanceArray,
     FloatVectorArray,
     IndexArray,
+    ValueArray,
     VectorArray,
 )
 from .dtype import FaissDType
@@ -30,10 +30,10 @@ __all__ = [
     # Core
     "FaissManager",
     "BinaryVectorArray",
-    "DistanceArray",
     "FaissDType",
     "FloatVectorArray",
     "IndexArray",
+    "ValueArray",
     "VectorArray",
     "FaissSearchMethod",
     "FaissMetric",

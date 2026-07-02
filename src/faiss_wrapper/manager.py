@@ -3,7 +3,7 @@ from __future__ import annotations
 import faiss # type: ignore
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Callable, cast
+from typing import Callable, Generic, TypeVar, cast
 
 from .types import SearchResultArrays, VectorArray
 from .dtype import FaissDType
@@ -11,10 +11,16 @@ from .metric import FaissMetric
 from .method import FaissSearchMethod
 from .result import FaissResult, FaissResults
 
+VectorArrayT = TypeVar("VectorArrayT", bound=VectorArray)
+
 @dataclass
-class FaissManager(ABC):
+class FaissManager(ABC, Generic[VectorArrayT]):
     """
     Abstract manager for Faiss. Subclass per search method (flat, ivf, ivfpq).
+
+    Generic over ``VectorArrayT`` so each dtype family (float, binary) narrows
+    ``add``/``search_batch``/``search_single`` to its own vector array type
+    without violating the Liskov substitution principle.
 
     Parameters:
     ----------
@@ -74,85 +80,92 @@ class FaissManager(ABC):
         """
 
     def add(
-        self, 
-        vectors: VectorArray
+        self,
+        vectors: VectorArrayT
         ) -> None:
         """
         Add vectors to the index.
 
         Parameters:
         ----------
-        vectors: VectorArray
+        vectors: VectorArrayT
             The vectors to add to the index.
         """
         self.index.add(vectors) # type: ignore
 
-    def search(
-        self, 
-        vectors: VectorArray, 
+    def search_batch(
+        self,
+        vectors: VectorArrayT,
         k: int = 10
-        ) -> FaissResult | FaissResults:
+        ) -> FaissResults:
         """
-        Search the index for the nearest neighbors.
+        Search the index for the nearest neighbors of a batch of query vectors.
 
         Parameters:
         ----------
-        vectors: VectorArray
-            Query vectors with shape ``(n_query, dimension)`` or a single
-            vector with shape ``(dimension,)``.
+        vectors: VectorArrayT
+            Query vectors with shape ``(n_query, dimension)``. Use
+            ``search_single`` for a single query vector with shape ``(dimension,)``.
+        k: int = 10
+            The number of nearest neighbors to return per query.
+
+        Returns:
+        ----------
+        FaissResults
+            Nearest neighbors for each query, shape ``(n_query, k)``.
+
+        Raises
+        ------
+        ValueError
+            If ``vectors`` is not 2-D.
+        """
+        if vectors.ndim != 2:
+            raise ValueError(
+                "vectors must be 2-D with shape (n_query, dimension). "
+                f"Got ndim={vectors.ndim}. Use search_single for a single query vector."
+            )
+        values, indices = cast(
+            SearchResultArrays,
+            self.index.search(vectors, k), # type: ignore
+        )
+        return FaissResults(
+            values=values,
+            indices=indices,
+            is_larger_nearer=self.metric.is_larger_nearer,
+        )
+
+    def search_single(
+        self,
+        vector: VectorArrayT,
+        k: int = 10
+        ) -> FaissResult:
+        """
+        Search the index for the nearest neighbors of a single query vector.
+
+        Parameters:
+        ----------
+        vector: VectorArrayT
+            Query vector with shape ``(dimension,)``.
         k: int = 10
             The number of nearest neighbors to return.
 
         Returns:
         ----------
-        FaissResult | FaissResults
-            ``FaissResult`` when ``vectors`` is 1-D; otherwise ``FaissResults``
-            with shape ``(n_query, k)``.
-        """
-        is_single_query: bool = vectors.ndim == 1
-        query_vectors: VectorArray = self._normalize_query_vectors(vectors)
-        distances, indices = cast(
-            SearchResultArrays,
-            self.index.search(query_vectors, k), # type: ignore
-        )
-        if is_single_query:
-            return FaissResult(
-                distances=distances[0],
-                indices=indices[0],
-            )
-        return FaissResults(
-            distances=distances,
-            indices=indices,
-        )
-
-    @staticmethod
-    def _normalize_query_vectors(vectors: VectorArray) -> VectorArray:
-        """
-        Ensure query vectors are a 2-D batch matrix for Faiss search.
-
-        Parameters
-        ----------
-        vectors : VectorArray
-            Query vectors with shape ``(n_query, dimension)`` or ``(dimension,)``.
-
-        Returns
-        -------
-        VectorArray
-            Query matrix with shape ``(n_query, dimension)``.
+        FaissResult
+            Nearest neighbors for the query, shape ``(k,)``.
 
         Raises
         ------
         ValueError
-            If ``vectors`` is not 1-D or 2-D.
+            If ``vector`` is not 1-D.
         """
-        if vectors.ndim == 1:
-            return vectors.reshape(1, -1)
-        if vectors.ndim == 2:
-            return vectors
-        raise ValueError(
-            "Query vectors must be 1-D or 2-D. "
-            f"Got ndim={vectors.ndim}."
-        )
+        if vector.ndim != 1:
+            raise ValueError(
+                "vector must be 1-D with shape (dimension,). "
+                f"Got ndim={vector.ndim}. Use search_batch for a batch of query vectors."
+            )
+        batch_vector = cast(VectorArrayT, vector.reshape(1, -1))
+        return self.search_batch(batch_vector, k)[0]
 
     def save(
         self, 

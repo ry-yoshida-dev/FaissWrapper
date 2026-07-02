@@ -15,19 +15,19 @@ IndexDType: TypeAlias = np.integer[Any]
 VectorArray: TypeAlias = NDArray[NumericDType]
 FloatVectorArray: TypeAlias = NDArray[FloatDType]
 BinaryVectorArray: TypeAlias = NDArray[BinaryDType]
-DistanceArray: TypeAlias = NDArray[FloatDType]
+ValueArray: TypeAlias = NDArray[FloatDType]
 IndexArray: TypeAlias = NDArray[IndexDType]
-SearchResultArrays: TypeAlias = tuple[DistanceArray, IndexArray]
+SearchResultArrays: TypeAlias = tuple[ValueArray, IndexArray]
 
 __all__ = [
     "BinaryDType",
     "BinaryVectorArray",
-    "DistanceArray",
     "FloatDType",
     "FloatVectorArray",
     "IndexArray",
     "IndexDType",
     "NumericDType",
     "SearchResultArrays",
+    "ValueArray",
     "VectorArray",
 ]

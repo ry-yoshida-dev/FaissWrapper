@@ -7,11 +7,10 @@ from typing import Callable
 from ...types import FloatVectorArray
 from ...dtype import FaissDType
 from ...manager import FaissManager
-from ...method import FaissSearchMethod
 from ...result import FaissResult, FaissResults
 
 @dataclass
-class FaissFloatManager(FaissManager):
+class FaissFloatManager(FaissManager[FloatVectorArray]):
     """
     Faiss manager for float search.
     
@@ -40,23 +39,41 @@ class FaissFloatManager(FaissManager):
         """
         super().add(vectors)
 
-    def search(self, vectors: FloatVectorArray, k: int = 10) -> FaissResult | FaissResults:
+    def search_batch(self, vectors: FloatVectorArray, k: int = 10) -> FaissResults:
         """
-        Search the index for nearest neighbors among float query vectors.
+        Search the index for nearest neighbors among a batch of float query vectors.
 
         Parameters
         ----------
         vectors : FloatVectorArray
-            Query vectors, shape ``(n_query, dimension)`` or ``(dimension,)``.
+            Query vectors, shape ``(n_query, dimension)``.
         k : int, optional
             Number of nearest neighbors to return per query.
 
         Returns
         -------
-        FaissResult | FaissResults
-            ``FaissResult`` for a single query vector; ``FaissResults`` for a batch.
+        FaissResults
+            Nearest neighbors for each query, shape ``(n_query, k)``.
         """
-        return super().search(vectors, k)
+        return super().search_batch(vectors, k)
+
+    def search_single(self, vector: FloatVectorArray, k: int = 10) -> FaissResult:
+        """
+        Search the index for nearest neighbors among a single float query vector.
+
+        Parameters
+        ----------
+        vector : FloatVectorArray
+            Query vector, shape ``(dimension,)``.
+        k : int, optional
+            Number of nearest neighbors to return.
+
+        Returns
+        -------
+        FaissResult
+            Nearest neighbors for the query, shape ``(k,)``.
+        """
+        return super().search_single(vector, k)
 
     @property
     def dtype(self) -> FaissDType:

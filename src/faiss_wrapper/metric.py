@@ -63,5 +63,19 @@ class FaissMetric(Enum):
             case FaissMetric.HAMMING:
                 return faiss.METRIC_L2
 
+    @property
+    def is_larger_nearer(self) -> bool:
+        """
+        Whether a larger value means a nearer (more similar) neighbor.
 
-
+        Returns
+        -------
+        bool
+            True for similarity metrics (``INNER_PRODUCT``); False for
+            distance metrics, where a smaller value means a nearer neighbor.
+        """
+        match self:
+            case FaissMetric.INNER_PRODUCT:
+                return True
+            case _:
+                return False

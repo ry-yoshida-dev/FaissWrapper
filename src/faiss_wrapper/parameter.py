@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .dtype import FaissDType
 from .method import FaissSearchMethod
@@ -34,14 +34,15 @@ class FaissParameter:
         self.dtype.validate_metric(self.method, self.metric)
 
     @property
-    def manager_class(self) -> type["FaissManager"]:
+    def manager_class(self) -> type["FaissManager[Any]"]:
         """
         Returns the corresponding manager class for the search method.
-        
+
         Returns:
         ----------
-        type[FaissManager]: The corresponding manager class for the search method.
+        type[FaissManager[Any]]: The corresponding manager class for the search method.
         """
+        manager_class: type["FaissManager[Any]"]
         match self.dtype:
             case FaissDType.FLOAT:
                 manager_class = self.float_manager_class

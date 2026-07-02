@@ -61,12 +61,12 @@ param = FaissParameter(
 manager: FaissManager = param.manager_class(dimension=dim, metric=FaissMetric.L2)
 manager.add(db_vectors)  # FloatVectorArray, shape (n, dim), float32
 
-results: FaissResults = manager.search(query_vectors, k=10)  # k: int
-# results.distances[i, j], results.indices[i, j]
+results: FaissResults = manager.search_batch(query_vectors, k=10)  # k: int
+# results.values[i, j], results.indices[i, j]
 
 single_query: FloatVectorArray = query_vectors[0]
-result: FaissResult = manager.search(single_query, k=10)
-# result.distances[j], result.indices[j]
+result: FaissResult = manager.search_single(single_query, k=10)
+# result.values[j], result.indices[j]
 
 # Optional: manager.save("my_index.faiss") / manager.load("my_index.faiss")
 ```

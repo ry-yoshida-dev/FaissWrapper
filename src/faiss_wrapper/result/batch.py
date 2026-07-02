@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..types import DistanceArray, IndexArray, SearchResultArrays
+from ..types import IndexArray, SearchResultArrays, ValueArray
 from .single import FaissResult
 from .utils import NeighborSorter
 
@@ -14,49 +14,54 @@ class FaissResults:
     """
     Search results for one or more query vectors.
 
-    Distances are sorted in ascending order in ``__post_init__`` so that
-    nearest neighbors appear at the front of each result row.
+    Neighbors are sorted nearest-first in ``__post_init__`` so that the
+    nearest neighbor appears at the front of each result row (see
+    ``FaissMetric.is_larger_nearer``).
 
     Parameters
     ----------
-    distances : DistanceArray
-        The distances of the nearest neighbors. Shape ``(n_queries, k)``.
+    values : ValueArray
+        The values of the nearest neighbors. Shape ``(n_queries, k)``.
     indices : IndexArray
         The indices of the nearest neighbors. Shape ``(n_queries, k)``.
+    is_larger_nearer : bool
+        Whether a larger value means a nearer neighbor.
     """
 
-    distances: DistanceArray
+    values: ValueArray
     indices: IndexArray
+    is_larger_nearer: bool
 
     def __post_init__(self) -> None:
         """
-        Normalize to 2-D, validate arrays, and sort neighbors by distance.
+        Normalize to 2-D, validate arrays, and sort neighbors nearest-first.
         """
-        self.distances, self.indices = self._normalize_to_batch(
-            self.distances,
+        self.values, self.indices = self._normalize_to_batch(
+            self.values,
             self.indices,
         )
-        sorted_distances, sorted_indices = NeighborSorter.sort_batch(
-            self.distances,
+        sorted_values, sorted_indices = NeighborSorter.sort_batch(
+            self.values,
             self.indices,
+            is_larger_nearer=self.is_larger_nearer,
         )
-        self.distances = sorted_distances
+        self.values = sorted_values
         self.indices = sorted_indices
 
     @staticmethod
     def _normalize_to_batch(
-        distances: DistanceArray,
+        values: ValueArray,
         indices: IndexArray,
     ) -> SearchResultArrays:
         """
-        Ensure distances and indices are 2-D batch arrays.
+        Ensure values and indices are 2-D batch arrays.
 
         Parameters
         ----------
-        distances : DistanceArray
-            Neighbor distances with shape ``(k,)`` or ``(n_queries, k)``.
+        values : ValueArray
+            Neighbor values with shape ``(k,)`` or ``(n_queries, k)``.
         indices : IndexArray
-            Neighbor indices aligned with ``distances``.
+            Neighbor indices aligned with ``values``.
 
         Returns
         -------
@@ -68,18 +73,18 @@ class FaissResults:
         ValueError
             If shapes do not match or ndim is invalid.
         """
-        if distances.shape != indices.shape:
+        if values.shape != indices.shape:
             raise ValueError(
-                "distances and indices must have the same shape. "
-                f"Got {distances.shape} and {indices.shape}."
+                "values and indices must have the same shape. "
+                f"Got {values.shape} and {indices.shape}."
             )
-        if distances.ndim == 1:
-            return distances.reshape(1, -1), indices.reshape(1, -1)
-        if distances.ndim == 2:
-            return distances, indices
+        if values.ndim == 1:
+            return values.reshape(1, -1), indices.reshape(1, -1)
+        if values.ndim == 2:
+            return values, indices
         raise ValueError(
-            "distances and indices must be 1-D or 2-D. "
-            f"Got ndim={distances.ndim}."
+            "values and indices must be 1-D or 2-D. "
+            f"Got ndim={values.ndim}."
         )
 
     def __len__(self) -> int:
@@ -91,7 +96,7 @@ class FaissResults:
         int
             Query count.
         """
-        return int(self.distances.shape[0])
+        return int(self.values.shape[0])
 
     @property
     def neighbor_count(self) -> int:
@@ -103,34 +108,35 @@ class FaissResults:
         int
             Neighbor count (``k``).
         """
-        return int(self.distances.shape[1])
+        return int(self.values.shape[1])
 
     @property
     def nearest_neighbors(self) -> FaissResults:
         """
-        Return the closest neighbor for each query.
+        Return the nearest neighbor for each query.
 
         Returns
         -------
         FaissResults
-            Distances and indices with shape ``(n_queries, 1)``.
+            Values and indices with shape ``(n_queries, 1)``.
         """
         return FaissResults(
-            distances=self.distances[:, :1],
+            values=self.values[:, :1],
             indices=self.indices[:, :1],
+            is_larger_nearer=self.is_larger_nearer,
         )
 
     @property
-    def min_distances(self) -> DistanceArray:
+    def nearest_values(self) -> ValueArray:
         """
-        Return the minimum distance for each query.
+        Return the nearest neighbor's value for each query.
 
         Returns
         -------
-        DistanceArray
-            Per-query minimum distances. Shape ``(n_queries,)``.
+        ValueArray
+            Per-query nearest values. Shape ``(n_queries,)``.
         """
-        return self.distances[:, 0]
+        return self.values[:, 0]
 
     def top_k_neighbors(self, k: int) -> SearchResultArrays:
         """
@@ -144,7 +150,7 @@ class FaissResults:
         Returns
         -------
         SearchResultArrays
-            Distances and indices with shape ``(n_queries, k)``.
+            Values and indices with shape ``(n_queries, k)``.
 
         Raises
         ------
@@ -159,7 +165,7 @@ class FaissResults:
                 "k must be less than or equal to the number of neighbors. "
                 f"Got {k} and {neighbor_count}."
             )
-        return self.distances[:, :k], self.indices[:, :k]
+        return self.values[:, :k], self.indices[:, :k]
 
     def __getitem__(self, index: int) -> FaissResult:
         """
@@ -173,11 +179,12 @@ class FaissResults:
         Returns
         -------
         FaissResult
-            Distances and indices with shape ``(k,)``.
+            Values and indices with shape ``(k,)``.
         """
         return FaissResult(
-            distances=self.distances[index],
+            values=self.values[index],
             indices=self.indices[index],
+            is_larger_nearer=self.is_larger_nearer,
         )
 
     @classmethod
@@ -196,6 +203,7 @@ class FaissResults:
             Batch result with shape ``(1, k)``.
         """
         return cls(
-            distances=result.distances.reshape(1, -1),
+            values=result.values.reshape(1, -1),
             indices=result.indices.reshape(1, -1),
+            is_larger_nearer=result.is_larger_nearer,
         )

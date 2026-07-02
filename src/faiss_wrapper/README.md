@@ -44,11 +44,11 @@ See [managers/float/README.md](managers/float/README.md) and [managers/binary/RE
 
 | Component | Description |
 | --------- | ----------- |
-| [`types.py`](types.py) | NumPy array type aliases for vectors, distances, and indices. |
+| [`types.py`](types.py) | NumPy array type aliases for vectors, values, and indices. |
 | [`manager.py`](manager.py) | Abstract index API shared by all concrete managers. |
 | [`method.py`](method.py) | Search methods and supported metrics. |
-| [`metric.py`](metric.py) | Distance/similarity kinds. |
-| [result/](result/README.md) | ``FaissResult`` (shape ``(k,)``) and ``FaissResults`` (shape ``(n_queries, k)``); neighbors sorted in ``__post_init__``. |
+| [`metric.py`](metric.py) | Distance/similarity kinds; exposes ``is_larger_nearer`` per metric. |
+| [result/](result/README.md) | ``FaissResult`` (shape ``(k,)``) and ``FaissResults`` (shape ``(n_queries, k)``); neighbors sorted nearest-first in ``__post_init__``. |
 | [managers/](managers/README.md) | Concrete manager implementations grouped by data type. |
 | [managers/float/](managers/float/README.md) | Float32 vector managers. |
 | [managers/binary/](managers/binary/README.md) | Packed binary vector managers. |

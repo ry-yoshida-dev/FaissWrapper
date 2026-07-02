@@ -10,7 +10,7 @@ from ...manager import FaissManager
 from ...result import FaissResult, FaissResults
 
 @dataclass
-class FaissBinaryManager(FaissManager):
+class FaissBinaryManager(FaissManager[BinaryVectorArray]):
     """
     Faiss manager for binary (flat) search with Hamming distance.
     Vectors must be uint8 arrays of shape (n, d_bits // 8).
@@ -38,24 +38,41 @@ class FaissBinaryManager(FaissManager):
         """
         super().add(vectors)
 
-    def search(self, vectors: BinaryVectorArray, k: int = 10) -> FaissResult | FaissResults:
+    def search_batch(self, vectors: BinaryVectorArray, k: int = 10) -> FaissResults:
         """
-        Search the index for nearest neighbors among binary query vectors.
+        Search the index for nearest neighbors among a batch of binary query vectors.
 
         Parameters
         ----------
         vectors : BinaryVectorArray
-            Packed binary query vectors (uint8), shape
-            ``(n_query, dimension // 8)`` or ``(dimension // 8,)``.
+            Packed binary query vectors (uint8), shape ``(n_query, dimension // 8)``.
         k : int, optional
             Number of nearest neighbors to return per query.
 
         Returns
         -------
-        FaissResult | FaissResults
-            ``FaissResult`` for a single query vector; ``FaissResults`` for a batch.
+        FaissResults
+            Nearest neighbors for each query, shape ``(n_query, k)``.
         """
-        return super().search(vectors, k)
+        return super().search_batch(vectors, k)
+
+    def search_single(self, vector: BinaryVectorArray, k: int = 10) -> FaissResult:
+        """
+        Search the index for nearest neighbors among a single binary query vector.
+
+        Parameters
+        ----------
+        vector : BinaryVectorArray
+            Packed binary query vector (uint8), shape ``(dimension // 8,)``.
+        k : int, optional
+            Number of nearest neighbors to return.
+
+        Returns
+        -------
+        FaissResult
+            Nearest neighbors for the query, shape ``(k,)``.
+        """
+        return super().search_single(vector, k)
 
     @property
     def dtype(self) -> FaissDType:

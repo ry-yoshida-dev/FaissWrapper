@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..types import DistanceArray, IndexArray, SearchResultArrays
+from ..types import IndexArray, SearchResultArrays, ValueArray
 from .utils import NeighborSorter
 
 
@@ -16,49 +16,55 @@ class FaissResult:
     """
     Search result for a single query vector.
 
-    Distances are sorted in ascending order in ``__post_init__`` so that
-    nearest neighbors appear at the front of the result.
+    Neighbors are sorted nearest-first in ``__post_init__``: ascending by
+    value for distance metrics, descending for similarity metrics such as
+    inner product (see ``FaissMetric.is_larger_nearer``).
 
     Parameters
     ----------
-    distances : DistanceArray
-        The distances of the nearest neighbors. Shape ``(k,)``.
+    values : ValueArray
+        The values of the nearest neighbors - distances for distance metrics,
+        similarities for similarity metrics. Shape ``(k,)``.
     indices : IndexArray
         The indices of the nearest neighbors. Shape ``(k,)``.
+    is_larger_nearer : bool
+        Whether a larger value means a nearer neighbor.
     """
 
-    distances: DistanceArray
+    values: ValueArray
     indices: IndexArray
+    is_larger_nearer: bool
 
     def __post_init__(self) -> None:
         """
-        Normalize to 1-D, validate arrays, and sort neighbors by distance.
+        Normalize to 1-D, validate arrays, and sort neighbors nearest-first.
         """
-        self.distances, self.indices = self._normalize_to_row(
-            self.distances,
+        self.values, self.indices = self._normalize_to_row(
+            self.values,
             self.indices,
         )
-        sorted_distances, sorted_indices = NeighborSorter.sort_row(
-            self.distances,
+        sorted_values, sorted_indices = NeighborSorter.sort_row(
+            self.values,
             self.indices,
+            is_larger_nearer=self.is_larger_nearer,
         )
-        self.distances = sorted_distances
+        self.values = sorted_values
         self.indices = sorted_indices
 
     @staticmethod
     def _normalize_to_row(
-        distances: DistanceArray,
+        values: ValueArray,
         indices: IndexArray,
     ) -> SearchResultArrays:
         """
-        Ensure distances and indices are 1-D arrays.
+        Ensure values and indices are 1-D arrays.
 
         Parameters
         ----------
-        distances : DistanceArray
-            Neighbor distances with shape ``(k,)`` or ``(1, k)``.
+        values : ValueArray
+            Neighbor values with shape ``(k,)`` or ``(1, k)``.
         indices : IndexArray
-            Neighbor indices aligned with ``distances``.
+            Neighbor indices aligned with ``values``.
 
         Returns
         -------
@@ -70,18 +76,18 @@ class FaissResult:
         ValueError
             If shapes do not match or ndim is invalid.
         """
-        if distances.shape != indices.shape:
+        if values.shape != indices.shape:
             raise ValueError(
-                "distances and indices must have the same shape. "
-                f"Got {distances.shape} and {indices.shape}."
+                "values and indices must have the same shape. "
+                f"Got {values.shape} and {indices.shape}."
             )
-        if distances.ndim == 1:
-            return distances, indices
-        if distances.ndim == 2 and distances.shape[0] == 1:
-            return distances.reshape(-1), indices.reshape(-1)
+        if values.ndim == 1:
+            return values, indices
+        if values.ndim == 2 and values.shape[0] == 1:
+            return values.reshape(-1), indices.reshape(-1)
         raise ValueError(
-            "distances and indices must be 1-D or a single row with shape (1, k). "
-            f"Got shape={distances.shape}."
+            "values and indices must be 1-D or a single row with shape (1, k). "
+            f"Got shape={values.shape}."
         )
 
     def __len__(self) -> int:
@@ -93,7 +99,7 @@ class FaissResult:
         int
             Neighbor count (``k``).
         """
-        return int(self.distances.shape[0])
+        return int(self.values.shape[0])
 
     @property
     def neighbor_count(self) -> int:
@@ -105,44 +111,45 @@ class FaissResult:
         int
             Neighbor count (``k``).
         """
-        return int(self.distances.shape[0])
+        return int(self.values.shape[0])
 
     @property
     def nearest_neighbor(self) -> FaissResult:
         """
-        Return the closest neighbor.
+        Return the nearest neighbor.
 
         Returns
         -------
         FaissResult
-            Distance and index with shape ``(1,)``.
+            Value and index with shape ``(1,)``.
         """
         return FaissResult(
-            distances=self.distances[:1],
+            values=self.values[:1],
             indices=self.indices[:1],
+            is_larger_nearer=self.is_larger_nearer,
         )
 
     @property
-    def min_distance(self) -> float:
+    def nearest_value(self) -> float:
         """
-        Return the minimum distance.
+        Return the value of the nearest neighbor.
 
         Returns
         -------
         float
-            The closest neighbor distance.
+            The nearest neighbor's value.
         """
-        return float(self.distances[0])
+        return float(self.values[0])
 
     @property
-    def min_index(self) -> int:
+    def nearest_index(self) -> int:
         """
-        Return the index of the closest neighbor.
+        Return the index of the nearest neighbor.
 
         Returns
         -------
         int
-            The closest neighbor index.
+            The nearest neighbor's index.
         """
         return int(self.indices[0])
 
@@ -158,7 +165,7 @@ class FaissResult:
         Returns
         -------
         FaissResult
-            Distances and indices with shape ``(k,)``.
+            Values and indices with shape ``(k,)``.
 
         Raises
         ------
@@ -174,35 +181,40 @@ class FaissResult:
                 f"Got {k} and {neighbor_count}."
             )
         return FaissResult(
-            distances=self.distances[:k],
+            values=self.values[:k],
             indices=self.indices[:k],
+            is_larger_nearer=self.is_larger_nearer,
         )
 
-    def filter_by_distance(self, distance: float) -> FaissResult:
+    def filter_by_value(self, value: float) -> FaissResult:
         """
-        Filter neighbors whose distance is less than or equal to ``distance``.
+        Filter neighbors that are at least as near as ``value``.
 
         Parameters
         ----------
-        distance : float
-            Maximum distance to keep.
+        value : float
+            Threshold to keep: neighbors with a value at least as near as
+            this are kept (``>= value`` when a larger value is nearer,
+            ``<= value`` otherwise).
 
         Returns
         -------
         FaissResult
-            Filtered distances and indices with shape ``(n,)``, where
+            Filtered values and indices with shape ``(n,)``, where
             ``n <= k``.
         """
-        mask: np.ndarray = self.distances <= distance
-        output_distances: DistanceArray = self.distances[mask]
+        mask: np.ndarray = self.values >= value if self.is_larger_nearer else self.values <= value
+        output_values: ValueArray = self.values[mask]
         output_indices: IndexArray = self.indices[mask]
-        if output_distances.size == 0:
-            warnings.warn("No neighbors found within the distance threshold.")
+        if output_values.size == 0:
+            warnings.warn("No neighbors found within the value threshold.")
             return FaissResult(
-                distances=np.array([], dtype=self.distances.dtype),
+                values=np.array([], dtype=self.values.dtype),
                 indices=np.array([], dtype=self.indices.dtype),
+                is_larger_nearer=self.is_larger_nearer,
             )
         return FaissResult(
-            distances=output_distances,
+            values=output_values,
             indices=output_indices,
+            is_larger_nearer=self.is_larger_nearer,
         )
