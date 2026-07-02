@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import faiss # type: ignore
 from dataclasses import dataclass
 
