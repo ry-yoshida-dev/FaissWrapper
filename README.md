@@ -58,7 +58,7 @@ param = FaissParameter(
     method=FaissSearchMethod.FLAT,
     metric=FaissMetric.L2,
 )
-manager: FaissManager = param.manager_class(dimension=dim, metric=FaissMetric.L2)
+manager: FaissManager = param.manager_class(dimension=dim, metric=param.metric)
 manager.add(db_vectors)  # FloatVectorArray, shape (n, dim), float32
 
 results: FaissResults = manager.search_batch(query_vectors, k=10)  # k: int
