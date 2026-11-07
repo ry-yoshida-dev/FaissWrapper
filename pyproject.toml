@@ -30,3 +30,5 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 faiss_wrapper = ["py.typed"]
+[tool.uv]
+exclude-newer = "7 days"
