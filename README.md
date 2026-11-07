@@ -37,19 +37,10 @@ param = FaissParameter(
     method=FaissSearchMethod.FLAT,
     metric=FaissMetric.L2,
 )
-manager = param.manager_class(dimension=dim, metric=param.metric)
+manager = param.float_manager_class(dimension=dim, metric=param.metric)
 manager.add(db_vectors)
 
 results = manager.search_batch(query_vectors, k=10)  # results.values, results.indices
 result = manager.search_single(query_vectors[0], k=10)
 manager.save("my_index.faiss")
-```
-
-## Development
-
-The tests are scripts run as modules from the project root:
-
-```bash
-python -m tests.test
-PYTHONPATH=. python tests/test_parameter.py
 ```

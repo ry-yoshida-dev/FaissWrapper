@@ -40,7 +40,11 @@ class NeighborSorter:
         SearchResultArrays
             Nearest-first ``(values, indices)`` pair.
         """
-        order: IndexArray = np.argsort(-values, kind="stable") if is_larger_nearer else np.argsort(values, kind="stable")
+        order: IndexArray = (
+            np.argsort(-values, kind="stable")
+            if is_larger_nearer
+            else np.argsort(values, kind="stable")
+        )
         sorted_values: ValueArray = values[order]
         sorted_indices: IndexArray = indices[order]
         return sorted_values, sorted_indices
@@ -70,7 +74,9 @@ class NeighborSorter:
             Nearest-first ``(values, indices)`` pair.
         """
         order: IndexArray = (
-            np.argsort(-values, axis=1, kind="stable") if is_larger_nearer else np.argsort(values, axis=1, kind="stable")
+            np.argsort(-values, axis=1, kind="stable")
+            if is_larger_nearer
+            else np.argsort(values, axis=1, kind="stable")
         )
         sorted_values: ValueArray = np.take_along_axis(values, order, axis=1)
         sorted_indices: IndexArray = np.take_along_axis(indices, order, axis=1)

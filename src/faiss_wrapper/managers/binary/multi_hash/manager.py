@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import faiss # type: ignore
 from dataclasses import dataclass
 
-from ..manager import FaissBinaryManager
+import faiss
+from typing_extensions import override
+
 from ....method import FaissSearchMethod
+from ..manager import FaissBinaryManager
+
 
 @dataclass
 class FaissBinaryMultiHashManager(FaissBinaryManager):
@@ -33,6 +36,7 @@ class FaissBinaryMultiHashManager(FaissBinaryManager):
     nhash: int = 4
     hash_bits: int = 12
 
+    @override
     def _validate_parameters(self) -> None:
         super()._validate_parameters()
         if self.nhash <= 0:
@@ -41,27 +45,28 @@ class FaissBinaryMultiHashManager(FaissBinaryManager):
             raise ValueError("hash_bits must be greater than 0.")
         if self.nhash * self.hash_bits > self.dimension:
             raise ValueError(
-                "nhash * hash_bits cannot exceed dimension (bit length); "
-                "Faiss partitions distinct bit ranges per table."
+                "nhash * hash_bits cannot exceed dimension (bit length); Faiss partitions distinct bit ranges per table."
             )
 
-    def _build_index(self) -> faiss.Index:
+    @override
+    def _build_index(self) -> faiss.IndexBinary:
         """
         Build the index.
-        
-        Returns:
-        ----------
-        faiss.Index: The built index.
+
+        Returns
+        -------
+        faiss.IndexBinary: The built index.
         """
-        return faiss.IndexBinaryMultiHash(self.dimension, self.nhash, self.hash_bits) # type: ignore
+        return faiss.IndexBinaryMultiHash(self.dimension, self.nhash, self.hash_bits)
 
     @property
+    @override
     def search_method(self) -> FaissSearchMethod:
         """
         Returns the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissSearchMethod: The search method.
         """
         return FaissSearchMethod.MULTI_HASH

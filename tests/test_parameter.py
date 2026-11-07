@@ -1,55 +1,72 @@
 """
 Tests for FaissParameter: all valid combinations build successfully,
 invalid combinations raise ValueError.
-
-Run from project root: PYTHONPATH=. python tests/test_parameter.py
 """
 
 import itertools
 
-from src.faiss_wrapper.dtype import FaissDType
-from src.faiss_wrapper.method import FaissSearchMethod
-from src.faiss_wrapper.metric import FaissMetric
-from src.faiss_wrapper.parameter import FaissParameter
+import pytest
+
+from faiss_wrapper import (
+    FaissBinaryManager,
+    FaissDType,
+    FaissFloatManager,
+    FaissMetric,
+    FaissParameter,
+    FaissSearchMethod,
+)
+
+Combination = tuple[FaissDType, FaissSearchMethod, FaissMetric]
 
 
-def iter_valid_combinations():
-    """Yield all (dtype, method, metric) that FaissParameter accepts."""
-    for dtype in FaissDType:
-        for method in dtype.supported_methods:
-            supported = (
-                method.float_supported_metrics
-                if dtype is FaissDType.FLOAT
-                else method.binary_supported_metrics
-            )
-            for metric in supported:
-                yield dtype, method, metric
+def valid_combinations() -> set[Combination]:
+    return {
+        (dtype, method, metric)
+        for dtype in FaissDType
+        for method in dtype.supported_methods
+        for metric in dtype.get_supported_metrics(method)
+    }
 
 
-def test_all_combinations():
-    """Valid combinations build; invalid ones raise ValueError (invalid combos are printed)."""
-    valid_set = set(iter_valid_combinations())
-    invalid_failed = []
-
-    for dtype, method, metric in itertools.product(
-        FaissDType, FaissSearchMethod, FaissMetric
-    ):
-        combo = (dtype, method, metric)
-        try:
-            param = FaissParameter(dtype=dtype, method=method, metric=metric)
-            assert param.manager_class is not None
-            assert combo in valid_set, f"Unexpected success: {dtype.value} + {method.value} + {metric.value}"
-        except ValueError as e:
-            if combo in valid_set:
-                raise AssertionError(f"Valid combo failed: {dtype.value} + {method.value} + {metric.value} -> {e}")
-            invalid_failed.append((dtype.value, method.value, metric.value))
-
-    if invalid_failed:
-        print("Invalid combinations (correctly rejected):")
-        for d, m, g in invalid_failed:
-            print(f"  {d}, {m}, {g}")
+def combination_key(combination: Combination) -> tuple[str, str, str]:
+    dtype, method, metric = combination
+    return dtype.value, method.value, metric.value
 
 
-if __name__ == "__main__":
-    test_all_combinations()
-    print("All parameter tests passed.")
+VALID_COMBINATIONS: list[Combination] = sorted(
+    valid_combinations(), key=combination_key
+)
+INVALID_COMBINATIONS: list[Combination] = sorted(
+    set(itertools.product(FaissDType, FaissSearchMethod, FaissMetric))
+    - set(VALID_COMBINATIONS),
+    key=combination_key,
+)
+
+
+@pytest.mark.parametrize(
+    ("dtype", "method", "metric"),
+    VALID_COMBINATIONS,
+    ids=str,
+)
+def test_valid_combination_selects_matching_manager(
+    dtype: FaissDType, method: FaissSearchMethod, metric: FaissMetric
+) -> None:
+    parameter = FaissParameter(dtype=dtype, method=method, metric=metric)
+    manager_class = parameter.manager_class
+    match dtype:
+        case FaissDType.FLOAT:
+            assert issubclass(manager_class, FaissFloatManager)
+        case FaissDType.BINARY:
+            assert issubclass(manager_class, FaissBinaryManager)
+
+
+@pytest.mark.parametrize(
+    ("dtype", "method", "metric"),
+    INVALID_COMBINATIONS,
+    ids=str,
+)
+def test_invalid_combination_is_rejected(
+    dtype: FaissDType, method: FaissSearchMethod, metric: FaissMetric
+) -> None:
+    with pytest.raises(ValueError, match="not supported"):
+        _ = FaissParameter(dtype=dtype, method=method, metric=metric)

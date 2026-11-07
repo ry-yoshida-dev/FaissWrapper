@@ -1,21 +1,23 @@
-from dataclasses import dataclass
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from .dtype import FaissDType
 from .method import FaissSearchMethod
 from .metric import FaissMetric
+
 if TYPE_CHECKING:
-    from .manager import FaissManager
-    from .managers.float import FaissFloatManager
     from .managers.binary import FaissBinaryManager
+    from .managers.float import FaissFloatManager
+
 
 @dataclass
 class FaissParameter:
     """
     Parameters for Faiss.
 
-    Parameters:
+    Parameters
     ----------
     dtype: FaissDType
         The data type of the vectors.
@@ -24,6 +26,7 @@ class FaissParameter:
     metric: FaissMetric
         The metric to use.
     """
+
     dtype: FaissDType
     method: FaissSearchMethod
     metric: FaissMetric
@@ -34,15 +37,18 @@ class FaissParameter:
         self.dtype.validate_metric(self.method, self.metric)
 
     @property
-    def manager_class(self) -> type["FaissManager[Any]"]:
+    def manager_class(self) -> type[FaissFloatManager] | type[FaissBinaryManager]:
         """
-        Returns the corresponding manager class for the search method.
+        Returns the corresponding manager class for the dtype and search method.
 
-        Returns:
-        ----------
-        type[FaissManager[Any]]: The corresponding manager class for the search method.
+        Use ``float_manager_class`` or ``binary_manager_class`` when the dtype is
+        known statically, so that type checkers see the matching vector array type.
+
+        Returns
+        -------
+        type[FaissFloatManager] | type[FaissBinaryManager]: The corresponding manager class.
         """
-        manager_class: type["FaissManager[Any]"]
+        manager_class: type[FaissFloatManager] | type[FaissBinaryManager]
         match self.dtype:
             case FaissDType.FLOAT:
                 manager_class = self.float_manager_class
@@ -51,57 +57,71 @@ class FaissParameter:
         return manager_class
 
     @property
-    def float_manager_class(self) -> type["FaissFloatManager"]:
+    def float_manager_class(self) -> type[FaissFloatManager]:
         """
         Returns the corresponding float manager class for the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         type[FaissFloatManager]: The corresponding float manager class for the search method.
         """
         match self.method:
             case FaissSearchMethod.FLAT:
                 from .managers.float.flat import FaissFloatFlatManager
+
                 return FaissFloatFlatManager
             case FaissSearchMethod.IVF:
                 from .managers.float.ivf import FaissFloatIVFManager
+
                 return FaissFloatIVFManager
             case FaissSearchMethod.IVFPQ:
                 from .managers.float.ivfpq import FaissFloatIVFPQManager
+
                 return FaissFloatIVFPQManager
             case FaissSearchMethod.HNSW:
                 from .managers.float.hnsw import FaissFloatHNSWManager
+
                 return FaissFloatHNSWManager
             case FaissSearchMethod.LSH:
                 from .managers.float.lsh import FaissFloatLSHManager
+
                 return FaissFloatLSHManager
             case _:
-                raise ValueError(f"Search method {self.method.value} is not supported for float data type.")
+                raise ValueError(
+                    f"Search method {self.method.value} is not supported for float data type."
+                )
 
     @property
-    def binary_manager_class(self) -> type["FaissBinaryManager"]:
+    def binary_manager_class(self) -> type[FaissBinaryManager]:
         """
         Returns the corresponding binary manager class for the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         type[FaissBinaryManager]: The corresponding binary manager class for the search method.
         """
         match self.method:
             case FaissSearchMethod.FLAT:
                 from .managers.binary.flat import FaissBinaryFlatManager
+
                 return FaissBinaryFlatManager
             case FaissSearchMethod.IVF:
                 from .managers.binary.ivf import FaissBinaryIVFManager
+
                 return FaissBinaryIVFManager
             case FaissSearchMethod.HNSW:
                 from .managers.binary.hnsw import FaissBinaryHNSWManager
+
                 return FaissBinaryHNSWManager
             case FaissSearchMethod.HASH:
                 from .managers.binary.hash import FaissBinaryHashManager
+
                 return FaissBinaryHashManager
             case FaissSearchMethod.MULTI_HASH:
                 from .managers.binary.multi_hash import FaissBinaryMultiHashManager
+
                 return FaissBinaryMultiHashManager
             case _:
-                raise ValueError(f"Search method {self.method.value} is not supported for binary data type.")
+                raise ValueError(
+                    f"Search method {self.method.value} is not supported for binary data type."
+                )

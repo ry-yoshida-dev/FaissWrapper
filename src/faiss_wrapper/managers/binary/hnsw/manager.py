@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import faiss # type: ignore
 from dataclasses import dataclass
 
-from ....types import BinaryVectorArray
-from ..manager import FaissBinaryManager
+import faiss
+from typing_extensions import override
+
 from ....method import FaissSearchMethod
+from ..manager import FaissBinaryManager
 
 
 @dataclass
@@ -13,7 +14,7 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
     """
     Faiss manager for binary HNSW (IndexBinaryHNSW), Hamming distance.
 
-    Parameters:
+    Parameters
     ----------
     dimension: int
         Number of bits per vector (multiple of 8).
@@ -28,6 +29,7 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
     M: int = 32
     efSearch: int = 64
 
+    @override
     def _validate_parameters(self) -> None:
         super()._validate_parameters()
         if self.M <= 0:
@@ -35,38 +37,29 @@ class FaissBinaryHNSWManager(FaissBinaryManager):
         if self.efSearch <= 0:
             raise ValueError("efSearch must be greater than 0.")
 
-    def _build_index(self) -> faiss.Index:
+    @override
+    def _build_index(self) -> faiss.IndexBinary:
         """
         Build the index.
-        
-        Returns:
-        ----------
-        faiss.Index: The built index.
-        """
-        return faiss.IndexBinaryHNSW(self.dimension, self.M) # type: ignore
 
-    def add(
-        self, 
-        vectors: BinaryVectorArray
-        ) -> None:
+        Returns
+        -------
+        faiss.IndexBinary: The built index.
         """
-        Add vectors to the index.
-
-        Parameters:
-        ----------
-        vectors: BinaryVectorArray
-            The vectors to add to the index.
-        """
-        super().add(vectors)
-        self.index.hnsw.efSearch = self.efSearch # type: ignore
+        index = faiss.IndexBinaryHNSW(self.dimension, self.M)
+        # The Faiss stubs type IndexBinaryHNSW.hnsw as Any; it is the same HNSW graph as the float index.
+        hnsw: faiss.HNSW = index.hnsw  # pyright: ignore[reportAny]
+        hnsw.efSearch = self.efSearch
+        return index
 
     @property
+    @override
     def search_method(self) -> FaissSearchMethod:
         """
         Returns the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissSearchMethod: The search method.
         """
         return FaissSearchMethod.HNSW

@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import faiss
 from enum import Enum
+
+import faiss
+
 
 class FaissMetric(Enum):
     """
     Enum class for Faiss metrics.
 
-    Parameters:
+    Parameters
     ----------
     L2: L2 distance.
     INNER_PRODUCT: Inner product distance.
@@ -19,6 +21,7 @@ class FaissMetric(Enum):
     JENSEN_SHANNON: Jensen-Shannon distance.
     HAMMING: Hamming distance.
     """
+
     L1 = "l1"
     L2 = "l2"
     INNER_PRODUCT = "inner_product"

@@ -1,16 +1,5 @@
-from .manager import FaissManager
-from .types import (
-    BinaryVectorArray,
-    FloatVectorArray,
-    IndexArray,
-    ValueArray,
-    VectorArray,
-)
 from .dtype import FaissDType
-from .method import FaissSearchMethod
-from .metric import FaissMetric
-from .result import FaissResult, FaissResults
-from .parameter import FaissParameter
+from .manager import FaissManager
 from .managers import (
     FaissBinaryFlatManager,
     FaissBinaryHashManager,
@@ -24,6 +13,17 @@ from .managers import (
     FaissFloatIVFPQManager,
     FaissFloatLSHManager,
     FaissFloatManager,
+)
+from .method import FaissSearchMethod
+from .metric import FaissMetric
+from .parameter import FaissParameter
+from .result import FaissResult, FaissResults
+from .types import (
+    BinaryVectorArray,
+    FloatVectorArray,
+    IndexArray,
+    ValueArray,
+    VectorArray,
 )
 
 __all__ = [
@@ -55,4 +55,3 @@ __all__ = [
     "FaissBinaryMultiHashManager",
     "FaissBinaryHashManager",
 ]
-

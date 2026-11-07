@@ -1,32 +1,40 @@
 from __future__ import annotations
 
-import faiss # type: ignore
+from abc import ABC
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
-from ...types import BinaryVectorArray
+import faiss
+from typing_extensions import override
+
 from ...dtype import FaissDType
 from ...manager import FaissManager
 from ...result import FaissResult, FaissResults
+from ...types import BinaryVectorArray
+
 
 @dataclass
-class FaissBinaryManager(FaissManager[BinaryVectorArray]):
+class FaissBinaryManager(FaissManager[BinaryVectorArray, faiss.IndexBinary], ABC):
     """
-    Faiss manager for binary (flat) search with Hamming distance.
+    Faiss manager for binary search with Hamming distance.
+
     Vectors must be uint8 arrays of shape (n, d_bits // 8).
 
-    Parameters:
+    Parameters
     ----------
     dimension: int
         Number of bits per vector (d_bits). Stored vectors have dimension // 8 bytes.
     metric: FaissMetric
         Must be FaissMetric.HAMMING (Hamming distance is always used).
     """
+
+    @override
     def _validate_parameters(self) -> None:
         super()._validate_parameters()
         if self.dimension % 8 != 0:
             raise ValueError("dimension (d_bits) must be a multiple of 8.")
 
+    @override
     def add(self, vectors: BinaryVectorArray) -> None:
         """
         Add packed binary vectors to the index.
@@ -38,6 +46,7 @@ class FaissBinaryManager(FaissManager[BinaryVectorArray]):
         """
         super().add(vectors)
 
+    @override
     def search_batch(self, vectors: BinaryVectorArray, k: int = 10) -> FaissResults:
         """
         Search the index for nearest neighbors among a batch of binary query vectors.
@@ -56,6 +65,7 @@ class FaissBinaryManager(FaissManager[BinaryVectorArray]):
         """
         return super().search_batch(vectors, k)
 
+    @override
     def search_single(self, vector: BinaryVectorArray, k: int = 10) -> FaissResult:
         """
         Search the index for nearest neighbors among a single binary query vector.
@@ -75,34 +85,37 @@ class FaissBinaryManager(FaissManager[BinaryVectorArray]):
         return super().search_single(vector, k)
 
     @property
+    @override
     def dtype(self) -> FaissDType:
         """
         Returns the data type of the vectors.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissDType: The data type of the vectors.
         """
         return FaissDType.BINARY
 
     @property
-    def save_function(self) -> Callable[[faiss.Index, str], None]:
+    @override
+    def save_function(self) -> Callable[[faiss.IndexBinary, str], None]:
         """
         Returns the save function for the binary index.
-        
-        Returns:
-        ----------
-        Callable[[faiss.Index, str], None]: The save function for the binary index.
+
+        Returns
+        -------
+        Callable[[faiss.IndexBinary, str], None]: The save function for the binary index.
         """
-        return faiss.write_index_binary # type: ignore
+        return faiss.write_index_binary
 
     @property
-    def load_function(self) -> Callable[[str], faiss.Index]:
+    @override
+    def load_function(self) -> Callable[[str], faiss.IndexBinary]:
         """
         Returns the load function for the binary index.
-        
-        Returns:
-        ----------
-        Callable[[str], faiss.Index]: The load function for the binary index.
+
+        Returns
+        -------
+        Callable[[str], faiss.IndexBinary]: The load function for the binary index.
         """
-        return faiss.read_index_binary # type: ignore
+        return faiss.read_index_binary

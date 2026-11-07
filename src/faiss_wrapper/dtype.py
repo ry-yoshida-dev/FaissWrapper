@@ -1,18 +1,19 @@
 from enum import Enum
 
-from .metric import FaissMetric
 from .method import FaissSearchMethod
+from .metric import FaissMetric
 
 
 class FaissDType(Enum):
     """
     Enum class for Faiss data types.
 
-    Attributes:
+    Attributes
     ----------
     FLOAT: float data type.
     BINARY: binary data type.
     """
+
     FLOAT = "float"
     BINARY = "binary"
 
@@ -20,33 +21,30 @@ class FaissDType(Enum):
     def supported_methods(self) -> list[FaissSearchMethod]:
         """
         Returns the supported methods for the data type.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         list[FaissSearchMethod]: The supported methods for the data type.
         """
         match self:
             case FaissDType.FLOAT:
                 return [
-                    FaissSearchMethod.FLAT, 
-                    FaissSearchMethod.IVF, 
-                    FaissSearchMethod.IVFPQ, 
-                    FaissSearchMethod.HNSW, 
+                    FaissSearchMethod.FLAT,
+                    FaissSearchMethod.IVF,
+                    FaissSearchMethod.IVFPQ,
+                    FaissSearchMethod.HNSW,
                     FaissSearchMethod.LSH,
                 ]
             case FaissDType.BINARY:
                 return [
-                    FaissSearchMethod.FLAT, 
+                    FaissSearchMethod.FLAT,
                     FaissSearchMethod.IVF,
                     FaissSearchMethod.HNSW,
                     FaissSearchMethod.HASH,
-                    FaissSearchMethod.MULTI_HASH
+                    FaissSearchMethod.MULTI_HASH,
                 ]
 
-    def validate_method(
-        self, 
-        method: FaissSearchMethod
-        ) -> None:
+    def validate_method(self, method: FaissSearchMethod) -> None:
         """
         Raise ValueError if method is not supported for this dtype.
 
@@ -69,17 +67,12 @@ class FaissDType(Enum):
             f"\nOr use {other} ({method} is supported there)."
             if method in other.supported_methods
             else ""
-            )
+        )
         raise ValueError(
-            f"{method} is not supported for {self}.\n"
-            f"Use one of:\n  - {allowed_methods}{hint}"
-            )
+            f"{method} is not supported for {self}.\nUse one of:\n  - {allowed_methods}{hint}"
+        )
 
-    def validate_metric(
-        self, 
-        method: FaissSearchMethod, 
-        metric: FaissMetric
-        ) -> None:
+    def validate_metric(self, method: FaissSearchMethod, metric: FaissMetric) -> None:
         """
         Raise ValueError if metric is not supported for (dtype, method).
 
@@ -109,14 +102,10 @@ class FaissDType(Enum):
             else ""
         )
         raise ValueError(
-            f"{metric} is not supported for {method}.\n"
-            f"Use one of:\n  - {allowed}{hint}"
+            f"{metric} is not supported for {method}.\nUse one of:\n  - {allowed}{hint}"
         )
 
-    def get_supported_metrics(
-        self, 
-        method: FaissSearchMethod
-        ) -> list[FaissMetric]:
+    def get_supported_metrics(self, method: FaissSearchMethod) -> list[FaissMetric]:
         """
         Return metrics supported by the given method for this dtype.
 
@@ -136,10 +125,7 @@ class FaissDType(Enum):
             else method.binary_supported_metrics
         )
 
-    def get_methods_for_metric(
-        self, 
-        metric: FaissMetric
-        ) -> list[FaissSearchMethod]:
+    def get_methods_for_metric(self, metric: FaissMetric) -> list[FaissSearchMethod]:
         """
         Return methods that support the given metric for this dtype.
 
@@ -153,4 +139,6 @@ class FaissDType(Enum):
         list[FaissSearchMethod]
             Methods that support the given metric for this dtype.
         """
-        return [m for m in self.supported_methods if metric in self.get_supported_metrics(m)]
+        return [
+            m for m in self.supported_methods if metric in self.get_supported_metrics(m)
+        ]

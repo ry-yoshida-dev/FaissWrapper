@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-import faiss
 from enum import Enum
+
+import faiss
+
 from .metric import FaissMetric
+
 
 class FaissSearchMethod(Enum):
     """
     Enum class for Faiss search methods.
 
-    Parameters:
+    Parameters
     ----------
     FLAT: Flat search method.
     IVF: Inverted file search method.
@@ -17,6 +20,7 @@ class FaissSearchMethod(Enum):
     LSH: Locality-sensitive hashing search method.
     BINARY: Binary (flat) search with Hamming distance.
     """
+
     FLAT = "flat"
     IVF = "ivf"
     IVFPQ = "ivfpq"
@@ -55,15 +59,21 @@ class FaissSearchMethod(Enum):
     def float_supported_metrics(self) -> list[FaissMetric]:
         """
         Returns the supported metrics for the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         list[FaissMetric]: The supported metrics for the search method.
         """
         match self:
-            case FaissSearchMethod.FLAT | FaissSearchMethod.IVF | FaissSearchMethod.HNSW:
+            case (
+                FaissSearchMethod.FLAT | FaissSearchMethod.IVF | FaissSearchMethod.HNSW
+            ):
                 return [m for m in FaissMetric if m is not FaissMetric.HAMMING]
-            case FaissSearchMethod.LSH | FaissSearchMethod.HASH | FaissSearchMethod.MULTI_HASH:
+            case (
+                FaissSearchMethod.LSH
+                | FaissSearchMethod.HASH
+                | FaissSearchMethod.MULTI_HASH
+            ):
                 return [FaissMetric.HAMMING]
             case FaissSearchMethod.IVFPQ:
                 return [FaissMetric.L2, FaissMetric.INNER_PRODUCT]
@@ -72,10 +82,9 @@ class FaissSearchMethod(Enum):
     def binary_supported_metrics(self) -> list[FaissMetric]:
         """
         Returns the supported metrics for the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         list[FaissMetric]: The supported metrics for the search method.
         """
         return [FaissMetric.HAMMING]
-

@@ -1,20 +1,24 @@
 from __future__ import annotations
 
-import faiss
+from abc import ABC
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
-from ...types import FloatVectorArray
+import faiss
+from typing_extensions import override
+
 from ...dtype import FaissDType
 from ...manager import FaissManager
 from ...result import FaissResult, FaissResults
+from ...types import FloatVectorArray
+
 
 @dataclass
-class FaissFloatManager(FaissManager[FloatVectorArray]):
+class FaissFloatManager(FaissManager[FloatVectorArray, faiss.Index], ABC):
     """
     Faiss manager for float search.
-    
-    Parameters:
+
+    Parameters
     ----------
     dimension: int
         The dimension of the vectors.
@@ -22,12 +26,14 @@ class FaissFloatManager(FaissManager[FloatVectorArray]):
         The metric to use.
     """
 
+    @override
     def _validate_parameters(self) -> None:
         """
         Validate the parameters of the manager.
         """
         super()._validate_parameters()
 
+    @override
     def add(self, vectors: FloatVectorArray) -> None:
         """
         Add float vectors to the index.
@@ -39,6 +45,7 @@ class FaissFloatManager(FaissManager[FloatVectorArray]):
         """
         super().add(vectors)
 
+    @override
     def search_batch(self, vectors: FloatVectorArray, k: int = 10) -> FaissResults:
         """
         Search the index for nearest neighbors among a batch of float query vectors.
@@ -57,6 +64,7 @@ class FaissFloatManager(FaissManager[FloatVectorArray]):
         """
         return super().search_batch(vectors, k)
 
+    @override
     def search_single(self, vector: FloatVectorArray, k: int = 10) -> FaissResult:
         """
         Search the index for nearest neighbors among a single float query vector.
@@ -76,34 +84,37 @@ class FaissFloatManager(FaissManager[FloatVectorArray]):
         return super().search_single(vector, k)
 
     @property
+    @override
     def dtype(self) -> FaissDType:
         """
         Returns the data type of the vectors.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissDType: The data type of the vectors.
         """
         return FaissDType.FLOAT
 
     @property
+    @override
     def save_function(self) -> Callable[[faiss.Index, str], None]:
         """
         Returns the save function for the float index.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         Callable[[faiss.Index, str], None]: The save function for the float index.
         """
         return faiss.write_index
 
     @property
+    @override
     def load_function(self) -> Callable[[str], faiss.Index]:
         """
         Returns the load function for the float index.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         Callable[[str], faiss.Index]: The load function for the float index.
         """
         return faiss.read_index

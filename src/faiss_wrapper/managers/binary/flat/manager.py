@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-import faiss # type: ignore
 from dataclasses import dataclass
 
-from ..manager import FaissBinaryManager
+import faiss
+from typing_extensions import override
+
 from ....method import FaissSearchMethod
+from ..manager import FaissBinaryManager
 
 
 @dataclass
 class FaissBinaryFlatManager(FaissBinaryManager):
     """
     Faiss manager for binary (flat) search with Hamming distance.
+
     Vectors must be uint8 arrays of shape (n, d_bits // 8).
 
-    Parameters:
+    Parameters
     ----------
     dimension: int
         Number of bits per vector (d_bits). Stored vectors have dimension // 8 bytes.
@@ -21,17 +24,18 @@ class FaissBinaryFlatManager(FaissBinaryManager):
         Must be FaissMetric.HAMMING (Hamming distance is always used).
     """
 
-    def _build_index(self) -> faiss.Index:
+    @override
+    def _build_index(self) -> faiss.IndexBinary:
         """
         Build the index.
-        
-        Returns:
-        ----------
-        faiss.Index: The built index.
+
+        Returns
+        -------
+        faiss.IndexBinary: The built index.
         """
-        return faiss.IndexBinaryFlat(self.dimension) # type: ignore
+        return faiss.IndexBinaryFlat(self.dimension)
 
     @property
+    @override
     def search_method(self) -> FaissSearchMethod:
         return FaissSearchMethod.FLAT
-

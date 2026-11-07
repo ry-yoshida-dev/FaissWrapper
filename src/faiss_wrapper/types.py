@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-NumericDType: TypeAlias = np.integer[Any] | np.unsignedinteger[Any] | np.floating[Any]
-FloatDType: TypeAlias = np.floating[Any]
-BinaryDType: TypeAlias = np.unsignedinteger[Any]
-IndexDType: TypeAlias = np.integer[Any]
+NumericDType: TypeAlias = np.integer | np.unsignedinteger | np.floating
+FloatDType: TypeAlias = np.floating
+BinaryDType: TypeAlias = np.unsignedinteger
+IndexDType: TypeAlias = np.integer
 
 VectorArray: TypeAlias = NDArray[NumericDType]
 FloatVectorArray: TypeAlias = NDArray[FloatDType]

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+
 from ..types import IndexArray, SearchResultArrays, ValueArray
 from .single import FaissResult
 from .utils import NeighborSorter
@@ -75,16 +77,14 @@ class FaissResults:
         """
         if values.shape != indices.shape:
             raise ValueError(
-                "values and indices must have the same shape. "
-                f"Got {values.shape} and {indices.shape}."
+                f"values and indices must have the same shape. Got {values.shape} and {indices.shape}."
             )
         if values.ndim == 1:
             return values.reshape(1, -1), indices.reshape(1, -1)
         if values.ndim == 2:
             return values, indices
         raise ValueError(
-            "values and indices must be 1-D or 2-D. "
-            f"Got ndim={values.ndim}."
+            f"values and indices must be 1-D or 2-D. Got ndim={values.ndim}."
         )
 
     def __len__(self) -> int:
@@ -96,7 +96,7 @@ class FaissResults:
         int
             Query count.
         """
-        return int(self.values.shape[0])
+        return len(self.values)
 
     @property
     def neighbor_count(self) -> int:
@@ -108,7 +108,7 @@ class FaissResults:
         int
             Neighbor count (``k``).
         """
-        return int(self.values.shape[1])
+        return np.size(self.values, 1)
 
     @property
     def nearest_neighbors(self) -> FaissResults:
@@ -162,8 +162,7 @@ class FaissResults:
         neighbor_count: int = self.neighbor_count
         if k > neighbor_count:
             raise ValueError(
-                "k must be less than or equal to the number of neighbors. "
-                f"Got {k} and {neighbor_count}."
+                f"k must be less than or equal to the number of neighbors. Got {k} and {neighbor_count}."
             )
         return self.values[:, :k], self.indices[:, :k]
 
@@ -181,9 +180,10 @@ class FaissResults:
         FaissResult
             Values and indices with shape ``(k,)``.
         """
+        # List indexing keeps the row as a typed (1, k) array; FaissResult flattens it.
         return FaissResult(
-            values=self.values[index],
-            indices=self.indices[index],
+            values=self.values[[index]],
+            indices=self.indices[[index]],
             is_larger_nearer=self.is_larger_nearer,
         )
 

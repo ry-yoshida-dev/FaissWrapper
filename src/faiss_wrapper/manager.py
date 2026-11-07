@@ -1,37 +1,43 @@
 from __future__ import annotations
 
-import faiss # type: ignore
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Generic, TypeVar, cast
+from typing import Generic, TypeVar, cast
 
-from .types import SearchResultArrays, VectorArray
+import faiss
+
 from .dtype import FaissDType
-from .metric import FaissMetric
 from .method import FaissSearchMethod
+from .metric import FaissMetric
 from .result import FaissResult, FaissResults
+from .types import SearchResultArrays, VectorArray
 
 VectorArrayT = TypeVar("VectorArrayT", bound=VectorArray)
+IndexT = TypeVar("IndexT", bound=faiss.Index | faiss.IndexBinary)
+
 
 @dataclass
-class FaissManager(ABC, Generic[VectorArrayT]):
+class FaissManager(ABC, Generic[VectorArrayT, IndexT]):
     """
     Abstract manager for Faiss. Subclass per search method (flat, ivf, ivfpq).
 
-    Generic over ``VectorArrayT`` so each dtype family (float, binary) narrows
-    ``add``/``search_batch``/``search_single`` to its own vector array type
-    without violating the Liskov substitution principle.
+    Generic over ``VectorArrayT`` and ``IndexT`` so each dtype family (float,
+    binary) narrows ``add``/``search_batch``/``search_single`` to its own vector
+    array type and the index to its own Faiss index type without violating the
+    Liskov substitution principle.
 
-    Parameters:
+    Parameters
     ----------
     dimension: int
         The dimension of the vectors.
     metric: FaissMetric
         The metric to use.
     """
+
     dimension: int
     metric: FaissMetric
-    index: faiss.Index = field(init=False)
+    index: IndexT = field(init=False)
     is_gpu_enabled: bool | None = field(default=None)
 
     def __post_init__(self) -> None:
@@ -45,23 +51,25 @@ class FaissManager(ABC, Generic[VectorArrayT]):
     def _validate_gpu_enabled(self) -> None:
         """
         Validate that the GPU is available.
-        
-        Raises:
-        ----------
+
+        Raises
+        ------
         ValueError: If the GPU is not available.
         """
-        num_gpus = faiss.get_num_gpus() # type: ignore
+        num_gpus = faiss.get_num_gpus()
         if self.is_gpu_enabled and num_gpus == 0:
-            raise ValueError("GPU is not available. Please set is_gpu_enabled to False or None.")
+            raise ValueError(
+                "GPU is not available. Please set is_gpu_enabled to False or None."
+            )
         if self.is_gpu_enabled is None:
-            self.is_gpu_enabled = num_gpus > 0            
+            self.is_gpu_enabled = num_gpus > 0
 
     def _validate_parameters(self) -> None:
         """
         Validate the parameters of the manager (dimension, metric vs search_method).
-        
-        Raises:
-        ----------
+
+        Raises
+        ------
         ValueError: If the dimension is not greater than 0, or metric is unsupported.
         """
         if self.dimension <= 0:
@@ -69,39 +77,34 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         self.dtype.validate_metric(self.search_method, self.metric)
 
     @abstractmethod
-    def _build_index(self) -> faiss.Index:
+    def _build_index(self) -> IndexT:
         """
-        Build and return the Faiss index. 
+        Build and return the Faiss index.
+
         Override in each concrete manager.
-        
-        Returns:
-        ----------
-        faiss.Index: The built Faiss index.
+
+        Returns
+        -------
+        IndexT: The built Faiss index.
         """
 
-    def add(
-        self,
-        vectors: VectorArrayT
-        ) -> None:
+    def add(self, vectors: VectorArrayT) -> None:
         """
         Add vectors to the index.
 
-        Parameters:
+        Parameters
         ----------
         vectors: VectorArrayT
             The vectors to add to the index.
         """
-        self.index.add(vectors) # type: ignore
+        # The Faiss stubs overload on torch.Tensor, which is unknown without torch installed.
+        self.index.add(vectors)  # pyright: ignore[reportUnknownMemberType]
 
-    def search_batch(
-        self,
-        vectors: VectorArrayT,
-        k: int = 10
-        ) -> FaissResults:
+    def search_batch(self, vectors: VectorArrayT, k: int = 10) -> FaissResults:
         """
         Search the index for the nearest neighbors of a batch of query vectors.
 
-        Parameters:
+        Parameters
         ----------
         vectors: VectorArrayT
             Query vectors with shape ``(n_query, dimension)``. Use
@@ -109,8 +112,8 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         k: int = 10
             The number of nearest neighbors to return per query.
 
-        Returns:
-        ----------
+        Returns
+        -------
         FaissResults
             Nearest neighbors for each query, shape ``(n_query, k)``.
 
@@ -121,12 +124,12 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         """
         if vectors.ndim != 2:
             raise ValueError(
-                "vectors must be 2-D with shape (n_query, dimension). "
-                f"Got ndim={vectors.ndim}. Use search_single for a single query vector."
+                f"vectors must be 2-D with shape (n_query, dimension). Got ndim={vectors.ndim}. Use search_single for a single query vector."
             )
+        # The Faiss stubs overload on torch.Tensor, which is unknown without torch installed.
         values, indices = cast(
             SearchResultArrays,
-            self.index.search(vectors, k), # type: ignore
+            self.index.search(vectors, k),  # pyright: ignore[reportUnknownMemberType]
         )
         return FaissResults(
             values=values,
@@ -134,23 +137,19 @@ class FaissManager(ABC, Generic[VectorArrayT]):
             is_larger_nearer=self.metric.is_larger_nearer,
         )
 
-    def search_single(
-        self,
-        vector: VectorArrayT,
-        k: int = 10
-        ) -> FaissResult:
+    def search_single(self, vector: VectorArrayT, k: int = 10) -> FaissResult:
         """
         Search the index for the nearest neighbors of a single query vector.
 
-        Parameters:
+        Parameters
         ----------
         vector: VectorArrayT
             Query vector with shape ``(dimension,)``.
         k: int = 10
             The number of nearest neighbors to return.
 
-        Returns:
-        ----------
+        Returns
+        -------
         FaissResult
             Nearest neighbors for the query, shape ``(k,)``.
 
@@ -161,20 +160,16 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         """
         if vector.ndim != 1:
             raise ValueError(
-                "vector must be 1-D with shape (dimension,). "
-                f"Got ndim={vector.ndim}. Use search_batch for a batch of query vectors."
+                f"vector must be 1-D with shape (dimension,). Got ndim={vector.ndim}. Use search_batch for a batch of query vectors."
             )
         batch_vector = cast(VectorArrayT, vector.reshape(1, -1))
         return self.search_batch(batch_vector, k)[0]
 
-    def save(
-        self, 
-        path: str
-        ) -> None:
+    def save(self, path: str) -> None:
         """
         Save the index.
 
-        Parameters:
+        Parameters
         ----------
         path: str
             The path of the file to save the index to.
@@ -183,14 +178,11 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         self._valid_faiss_path(path)
         self.save_function(self.index, path)
 
-    def load(
-        self, 
-        path: str
-        ) -> None:
+    def load(self, path: str) -> None:
         """
         Load the index.
 
-        Parameters:
+        Parameters
         ----------
         path: str
             The path of the file to load the index from.
@@ -199,14 +191,11 @@ class FaissManager(ABC, Generic[VectorArrayT]):
         self._valid_faiss_path(path)
         self.index = self.load_function(path)
 
-    def _valid_faiss_path(
-        self, 
-        path: str
-        ) -> None:
+    def _valid_faiss_path(self, path: str) -> None:
         """
         Validate that the path ends with .faiss.
-        
-        Parameters:
+
+        Parameters
         ----------
         path: str
             The path to validate.
@@ -219,9 +208,9 @@ class FaissManager(ABC, Generic[VectorArrayT]):
     def search_method(self) -> FaissSearchMethod:
         """
         Returns the search method.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissSearchMethod: The search method.
         """
 
@@ -230,32 +219,30 @@ class FaissManager(ABC, Generic[VectorArrayT]):
     def dtype(self) -> FaissDType:
         """
         Returns the data type of the vectors.
-        
-        Returns:
-        ----------
+
+        Returns
+        -------
         FaissDType: The data type of the vectors.
         """
 
     @property
     @abstractmethod
-    def save_function(self) -> Callable[[faiss.Index, str], None]:
+    def save_function(self) -> Callable[[IndexT, str], None]:
         """
         Returns the save function for the index.
-        
-        Returns:
-        ----------
-        Callable[[faiss.Index, str], None]: The save function for the index.
+
+        Returns
+        -------
+        Callable[[IndexT, str], None]: The save function for the index.
         """
 
     @property
     @abstractmethod
-    def load_function(self) -> Callable[[str], faiss.Index]:
+    def load_function(self) -> Callable[[str], IndexT]:
         """
         Returns the load function for the index.
-        
-        Returns:
-        ----------
-        Callable[[str], faiss.Index]: The load function for the index.
+
+        Returns
+        -------
+        Callable[[str], IndexT]: The load function for the index.
         """
-
-

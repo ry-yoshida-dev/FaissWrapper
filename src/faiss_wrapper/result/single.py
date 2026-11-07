@@ -6,6 +6,7 @@ import warnings
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..types import IndexArray, SearchResultArrays, ValueArray
 from .utils import NeighborSorter
@@ -78,16 +79,14 @@ class FaissResult:
         """
         if values.shape != indices.shape:
             raise ValueError(
-                "values and indices must have the same shape. "
-                f"Got {values.shape} and {indices.shape}."
+                f"values and indices must have the same shape. Got {values.shape} and {indices.shape}."
             )
         if values.ndim == 1:
             return values, indices
         if values.ndim == 2 and values.shape[0] == 1:
             return values.reshape(-1), indices.reshape(-1)
         raise ValueError(
-            "values and indices must be 1-D or a single row with shape (1, k). "
-            f"Got shape={values.shape}."
+            f"values and indices must be 1-D or a single row with shape (1, k). Got shape={values.shape}."
         )
 
     def __len__(self) -> int:
@@ -99,7 +98,7 @@ class FaissResult:
         int
             Neighbor count (``k``).
         """
-        return int(self.values.shape[0])
+        return len(self.values)
 
     @property
     def neighbor_count(self) -> int:
@@ -111,7 +110,7 @@ class FaissResult:
         int
             Neighbor count (``k``).
         """
-        return int(self.values.shape[0])
+        return len(self.values)
 
     @property
     def nearest_neighbor(self) -> FaissResult:
@@ -139,7 +138,7 @@ class FaissResult:
         float
             The nearest neighbor's value.
         """
-        return float(self.values[0])
+        return self.values.item(0)
 
     @property
     def nearest_index(self) -> int:
@@ -151,7 +150,7 @@ class FaissResult:
         int
             The nearest neighbor's index.
         """
-        return int(self.indices[0])
+        return self.indices.item(0)
 
     def top_k_neighbors(self, k: int) -> FaissResult:
         """
@@ -177,8 +176,7 @@ class FaissResult:
         neighbor_count: int = self.neighbor_count
         if k > neighbor_count:
             raise ValueError(
-                "k must be less than or equal to the number of neighbors. "
-                f"Got {k} and {neighbor_count}."
+                f"k must be less than or equal to the number of neighbors. Got {k} and {neighbor_count}."
             )
         return FaissResult(
             values=self.values[:k],
@@ -203,11 +201,15 @@ class FaissResult:
             Filtered values and indices with shape ``(n,)``, where
             ``n <= k``.
         """
-        mask: np.ndarray = self.values >= value if self.is_larger_nearer else self.values <= value
+        mask: NDArray[np.bool_] = (
+            self.values >= value if self.is_larger_nearer else self.values <= value
+        )
         output_values: ValueArray = self.values[mask]
         output_indices: IndexArray = self.indices[mask]
         if output_values.size == 0:
-            warnings.warn("No neighbors found within the value threshold.")
+            warnings.warn(
+                "No neighbors found within the value threshold.", stacklevel=2
+            )
             return FaissResult(
                 values=np.array([], dtype=self.values.dtype),
                 indices=np.array([], dtype=self.indices.dtype),
