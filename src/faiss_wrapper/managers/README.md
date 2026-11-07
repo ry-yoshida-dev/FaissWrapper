@@ -2,11 +2,7 @@
 
 ## Overview
 
-Concrete FAISS index managers grouped by vector data type (`FaissDType`).
-Each dtype subtree exposes one manager class per supported search method.
-
-The abstract base [`FaissManager`](../manager.py) lives at the package root; this
-directory holds dtype-specific subclasses and their method implementations.
+Concrete `FaissManager` implementations grouped by vector data type (`FaissDType`), one manager class per supported search method.
 
 ## Components
 

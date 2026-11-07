@@ -2,17 +2,15 @@
 
 ## Overview
 
-Dataclasses that wrap Faiss ``search_batch``/``search_single`` output. Neighbors are sorted nearest-first
-in ``__post_init__``: ascending by value for distance metrics, descending for
-similarity metrics such as inner product (see ``FaissMetric.is_larger_nearer``).
+Dataclasses that wrap `search_single` / `search_batch` output, with neighbors sorted nearest-first.
 
 ## Components
 
 | Component | Description |
 | --------- | ----------- |
-| [`single.py`](single.py) | ``FaissResult`` for one query vector; arrays have shape ``(k,)``. Supports ``filter_by_value``. |
-| [`batch.py`](batch.py) | ``FaissResults`` for multiple queries; arrays have shape ``(n_queries, k)``. |
-| [`utils.py`](utils.py) | ``NeighborSorter`` sorts value/index pairs for single rows and batches. |
+| [`single.py`](single.py) | `FaissResult` for one query vector. |
+| [`batch.py`](batch.py) | `FaissResults` for multiple queries. |
+| [`utils.py`](utils.py) | `NeighborSorter` sorts value/index pairs nearest-first. |
 
 ## Examples
 
